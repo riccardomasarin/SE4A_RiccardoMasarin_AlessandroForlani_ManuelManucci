@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NightOut — Dashboard Locale</title>
+
+  <style>
+    :root {
+      --bg: #030305;
+      --panel: #111119;
+      --panel2: #171724;
+      --glass: rgba(255,255,255,.075);
+      --glass2: rgba(255,255,255,.12);
+      --line: rgba(255,255,255,.105);
+      --line2: rgba(255,255,255,.18);
+      --text: #fbfbff;
+      --muted: #a3a0ad;
+      --muted2: #706c7a;
+      --purple: #8b5cff;
+      --purple2: #6a4cff;
+      --blue: #4d7cff;
+      --pink: #d94dff;
+      --green: #5df0a4;
+      --yellow: #ffd76d;
+      --red: #ff5c7a;
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --shadow: 0 18px 45px rgba(0,0,0,.52);
+      --glow: 0 0 36px rgba(139,92,255,.34);
+      --safe-bottom: env(safe-area-inset-bottom);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: #000;
+      color: var(--text);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      background:
+        radial-gradient(circle at 50% -5%, rgba(139,92,255,.22), transparent 32%),
+        radial-gradient(circle at 0% 25%, rgba(77,124,255,.12), transparent 28%),
+        radial-gradient(circle at 100% 38%, rgba(217,77,255,.09), transparent 30%),
+        #000;
+    }
+
+    .phone {
+      width: 100%;
+      max-width: 430px;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.025), transparent 20%),
+        var(--bg);
+      padding: 18px 16px 178px;
+    }
+
+    .content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .top-glow {
+      position: absolute;
+      top: 80px;
+      left: 50%;
+      width: 310px;
+      height: 220px;
+      transform: translateX(-50%);
+      background: radial-gradient(circle, rgba(139,92,255,.24), transparent 68%);
+      filter: blur(8px);
+      pointer-events: none;
+    }
+
+    /* HEADER */
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .club-name {
+      margin: 0 0 7px;
+      font-size: 30px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: -1.15px;
+    }
+
+    .club-role {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .code-pill {
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: rgba(139,92,255,.14);
+      border: 1px solid rgba(139,92,255,.35);
+      color: #ddd6ff;
+      font-weight: 850;
+      box-shadow: 0 0 18px rgba(139,92,255,.16);
+    }
+
+    .logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.16);
+      background:
+        linear-gradient(135deg, rgba(139,92,255,.88), rgba(77,124,255,.76)),
+        url("https://images.unsplash.com/photo-1571266028243-d220c9c7f18e?auto=format&fit=crop&w=400&q=85");
+      background-size: cover;
+      background-position: center;
+      box-shadow: 0 0 24px rgba(139,92,255,.34);
+      cursor: pointer;
+    }
+
+    /* EVENT SUMMARY */
+
+    .event-card {
+      position: relative;
+      overflow: hidden;
+      padding: 18px;
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(139,92,255,.25);
+      background:
+        radial-gradient(circle at 88% 10%, rgba(139,92,255,.31), transparent 36%),
+        radial-gradient(circle at 8% 92%, rgba(77,124,255,.20), transparent 35%),
+        linear-gradient(180deg, rgba(255,255,255,.095), rgba(255,255,255,.035));
+      box-shadow: var(--glow), var(--shadow);
+      margin-bottom: 28px;
+    }
+
+    .event-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 17px;
+    }
+
+    .event-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 800;
+      margin-bottom: 5px;
+    }
+
+    .event-title {
+      font-size: 18px;
+      font-weight: 950;
+      letter-spacing: -.45px;
+    }
+
+    .change-event {
+      border: 1px solid rgba(255,255,255,.13);
+      background: rgba(255,255,255,.08);
+      color: white;
+      padding: 8px 11px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .event-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .metric {
+      padding: 12px 8px;
+      border-radius: 18px;
+      background: rgba(0,0,0,.29);
+      border: 1px solid rgba(255,255,255,.08);
+      text-align: center;
+      min-width: 0;
+    }
+
+    .metric-value {
+      font-size: 19px;
+      font-weight: 950;
+      letter-spacing: -.7px;
+      margin-bottom: 4px;
+      white-space: nowrap;
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 10.5px;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+
+    /* SECTIONS */
+
+    .section {
+      margin-bottom: 28px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.05;
+      font-weight: 950;
+      letter-spacing: -.9px;
+    }
+
+    .section-subtitle {
+      margin-top: 5px;
+      color: var(--muted2);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .show-all {
+      border: 0;
+      background: transparent;
+      color: var(--purple);
+      font-size: 15px;
+      font-weight: 900;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .carousel {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      padding: 2px 16px 8px 0;
+      margin-right: -16px;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+
+    .carousel::-webkit-scrollbar {
+      display: none;
+    }
+
+    .seller-card {
+      position: relative;
+      flex: 0 0 212px;
+      min-height: 188px;
+      scroll-snap-align: start;
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,.11);
+      background:
+        radial-gradient(circle at 90% 0%, rgba(139,92,255,.18), transparent 38%),
+        linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.035));
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      cursor: pointer;
+      padding: 14px;
+    }
+
+    .seller-card.featured {
+      border-color: rgba(139,92,255,.5);
+      box-shadow: 0 0 34px rgba(139,92,255,.25), var(--shadow);
+    }
+
+    .seller-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+
+    .seller-name {
+      font-size: 19px;
+      font-weight: 950;
+      letter-spacing: -.5px;
+      line-height: 1.05;
+      margin-bottom: 5px;
+    }
+
+    .seller-type {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 27px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      line-height: 1;
+      font-weight: 950;
+      color: white;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      box-shadow: 0 0 18px rgba(139,92,255,.30);
+      white-space: nowrap;
+    }
+
+    .badge.dark {
+      background: rgba(0,0,0,.42);
+      border: 1px solid rgba(255,255,255,.13);
+      box-shadow: none;
+      color: #eee9ff;
+    }
+
+    .badge.green {
+      background: rgba(93,240,164,.16);
+      color: #b8ffd8;
+      border: 1px solid rgba(93,240,164,.32);
+      box-shadow: none;
+    }
+
+    .badge.yellow {
+      background: rgba(255,215,109,.16);
+      color: #ffe7a8;
+      border: 1px solid rgba(255,215,109,.32);
+      box-shadow: none;
+    }
+
+    .badge.red {
+      background: rgba(255,92,122,.16);
+      color: #ffbdc9;
+      border: 1px solid rgba(255,92,122,.32);
+      box-shadow: none;
+    }
+
+    .seller-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .seller-stat {
+      padding: 10px;
+      border-radius: 16px;
+      background: rgba(0,0,0,.25);
+      border: 1px solid rgba(255,255,255,.075);
+    }
+
+    .seller-stat-value {
+      font-size: 18px;
+      font-weight: 950;
+      letter-spacing: -.4px;
+      margin-bottom: 2px;
+    }
+
+    .seller-stat-label {
+      font-size: 10.5px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .promo-line {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: #e7e1ff;
+      font-size: 12px;
+      font-weight: 850;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .promo-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--purple);
+      box-shadow: 0 0 12px rgba(139,92,255,.7);
+      flex-shrink: 0;
+    }
+
+    /* PERFORMANCE */
+
+    .performance-card {
+      border-radius: var(--radius-xl);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.035));
+      border: 1px solid var(--line);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      padding: 12px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+
+    .tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab {
+      flex: 0 0 auto;
+      padding: 10px 13px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      color: #ddd8e7;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 0 18px rgba(139,92,255,.3);
+    }
+
+    .perf-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      background: rgba(255,255,255,.08);
+    }
+
+    .perf-box {
+      background: rgba(8,8,13,.96);
+      padding: 16px 14px;
+      min-height: 82px;
+    }
+
+    .perf-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+      margin-bottom: 7px;
+    }
+
+    .perf-value {
+      font-size: 24px;
+      font-weight: 950;
+      letter-spacing: -.7px;
+    }
+
+    .perf-note {
+      margin-top: 5px;
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 850;
+    }
+
+    .insight-panel {
+      padding: 16px;
+      background: rgba(10,10,16,.96);
+    }
+
+    .chart-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .chart-title {
+      font-size: 14px;
+      font-weight: 950;
+    }
+
+    .chart-note {
+      color: var(--muted2);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .bars {
+      height: 86px;
+      display: flex;
+      align-items: end;
+      gap: 9px;
+      margin-bottom: 18px;
+    }
+
+    .bar-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .bar {
+      width: 100%;
+      min-height: 12px;
+      border-radius: 999px 999px 5px 5px;
+      background: linear-gradient(180deg, var(--purple), rgba(77,124,255,.55));
+      box-shadow: 0 0 18px rgba(139,92,255,.25);
+    }
+
+    .bar-label {
+      color: var(--muted2);
+      font-size: 10px;
+      font-weight: 850;
+    }
+
+    .insight-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .insight-box {
+      padding: 13px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.055);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .insight-title {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 850;
+      margin-bottom: 8px;
+    }
+
+    .insight-main {
+      font-size: 18px;
+      font-weight: 950;
+      letter-spacing: -.4px;
+    }
+
+    .split {
+      display: flex;
+      height: 8px;
+      border-radius: 99px;
+      overflow: hidden;
+      background: rgba(255,255,255,.08);
+      margin-top: 9px;
+    }
+
+    .split .a {
+      background: var(--purple);
+    }
+
+    .split .b {
+      background: var(--blue);
+    }
+
+    /* SEARCH DOCK */
+
+    .search-dock {
+      position: fixed;
+      left: 50%;
+      bottom: 76px;
+      transform: translateX(-50%);
+      width: min(430px, 100%);
+      padding: 0 14px;
+      z-index: 30;
+      pointer-events: none;
+    }
+
+    .search-panel {
+      pointer-events: auto;
+      border-radius: 26px;
+      background:
+        linear-gradient(180deg, rgba(23,23,34,.96), rgba(10,10,15,.97));
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 -8px 34px rgba(0,0,0,.52), 0 0 28px rgba(139,92,255,.16);
+      padding: 12px;
+      backdrop-filter: blur(18px);
+    }
+
+    .search-row {
+      height: 46px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.055);
+      border: 1px solid rgba(255,255,255,.08);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 13px;
+      margin-bottom: 10px;
+    }
+
+    .search-row svg {
+      color: var(--muted2);
+      flex-shrink: 0;
+    }
+
+    .search-input {
+      width: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: white;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .search-input::placeholder {
+      color: #7b7784;
+    }
+
+    .chips {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 1px;
+    }
+
+    .chips::-webkit-scrollbar {
+      display: none;
+    }
+
+    .chip {
+      flex: 0 0 auto;
+      border: 1px solid rgba(255,255,255,.11);
+      background: rgba(255,255,255,.065);
+      color: #ded9e8;
+      border-radius: 999px;
+      padding: 8px 11px;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .chip.active {
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 0 18px rgba(139,92,255,.32);
+    }
+
+    /* BOTTOM NAV */
+
+    .bottom-nav {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: min(430px, 100%);
+      height: calc(74px + var(--safe-bottom));
+      padding: 9px 12px calc(8px + var(--safe-bottom));
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.72), rgba(0,0,0,.96));
+      border-top: 1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(18px);
+      z-index: 31;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+    }
+
+    .nav-item {
+      border: 0;
+      background: transparent;
+      color: #686471;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 850;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .nav-item svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .nav-item.active {
+      color: var(--purple);
+    }
+
+    .nav-item.active svg {
+      filter: drop-shadow(0 0 10px rgba(139,92,255,.44));
+    }
+
+    /* DETAIL SHEET */
+
+    .detail-sheet {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: rgba(0,0,0,.66);
+      opacity: 0;
+      pointer-events: none;
+      transition: .22s ease;
+      display: flex;
+      justify-content: center;
+      align-items: end;
+    }
+
+    .detail-sheet.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .sheet-content {
+      width: min(430px, 100%);
+      max-height: 90vh;
+      overflow-y: auto;
+      border-radius: 34px 34px 0 0;
+      background: #08080d;
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 -20px 60px rgba(0,0,0,.68);
+      transform: translateY(22px);
+      transition: .22s ease;
+    }
+
+    .detail-sheet.open .sheet-content {
+      transform: translateY(0);
+    }
+
+    .sheet-hero {
+      position: relative;
+      min-height: 178px;
+      padding: 18px;
+      border-radius: 34px 34px 0 0;
+      background:
+        radial-gradient(circle at 80% 0%, rgba(139,92,255,.28), transparent 42%),
+        linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.025));
+      overflow: hidden;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 42px;
+      height: 42px;
+      border-radius: 15px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.42);
+      color: white;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      backdrop-filter: blur(12px);
+    }
+
+    .sheet-kicker {
+      color: #ddd6ff;
+      font-size: 12px;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .sheet-title {
+      font-size: 30px;
+      font-weight: 950;
+      letter-spacing: -1px;
+      max-width: 300px;
+      line-height: 1.04;
+      margin-bottom: 12px;
+    }
+
+    .sheet-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .sheet-body {
+      padding: 16px 16px 28px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .detail-box {
+      padding: 14px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.055);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .detail-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+      margin-bottom: 6px;
+    }
+
+    .detail-value {
+      font-size: 19px;
+      font-weight: 950;
+      letter-spacing: -.45px;
+    }
+
+    .table {
+      border-radius: 22px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.09);
+      background: rgba(255,255,255,.04);
+    }
+
+    .table-title {
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 950;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1.1fr .75fr .85fr .85fr;
+      gap: 8px;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.065);
+      align-items: center;
+    }
+
+    .row:last-child {
+      border-bottom: 0;
+    }
+
+    .row.head {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      background: rgba(0,0,0,.18);
+    }
+
+    .cell {
+      min-width: 0;
+      font-size: 12px;
+      font-weight: 800;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .status {
+      display: inline-flex;
+      width: fit-content;
+      padding: 5px 7px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 950;
+      background: rgba(93,240,164,.15);
+      color: #b8ffd8;
+      border: 1px solid rgba(93,240,164,.28);
+    }
+
+    .status.pending {
+      background: rgba(255,215,109,.15);
+      color: #ffe7a8;
+      border-color: rgba(255,215,109,.28);
+    }
+
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .primary-btn,
+    .secondary-btn {
+      height: 48px;
+      border-radius: 17px;
+      font-size: 13px;
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    .primary-btn {
+      border: 0;
+      color: white;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      box-shadow: 0 0 24px rgba(139,92,255,.34);
+    }
+
+    .secondary-btn {
+      color: white;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+    }
+
+    @media (max-width: 360px) {
+      .event-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .seller-card {
+        flex-basis: 198px;
+      }
+
+      .section-title {
+        font-size: 22px;
+      }
+
+      .row {
+        grid-template-columns: 1fr .7fr .8fr;
+      }
+
+      .row .cell:nth-child(4) {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="phone">
+    <div class="top-glow"></div>
+
+    <div class="content">
+      <!-- HEADER -->
+      <header class="header">
+        <div>
+          <h1 class="club-name">Crush Club</h1>
+          <div class="club-role">
+            <span>NightOut Partner</span>
+            <span class="code-pill">#48392</span>
+          </div>
+        </div>
+
+        <button class="logo" aria-label="Account locale"></button>
+      </header>
+
+      <!-- SERATA -->
+      <section class="event-card">
+        <div class="event-top">
+          <div>
+            <div class="event-label">Serata selezionata</div>
+            <div class="event-title">Crush Friday · Sab 7 Mar</div>
+          </div>
+
+          <button class="change-event">Cambia</button>
+        </div>
+
+        <div class="event-grid">
+          <div class="metric">
+            <div class="metric-value">248</div>
+            <div class="metric-label">Ticket</div>
+          </div>
+
+          <div class="metric">
+            <div class="metric-value">18</div>
+            <div class="metric-label">Tavoli</div>
+          </div>
+
+          <div class="metric">
+            <div class="metric-value">64</div>
+            <div class="metric-label">Pregame</div>
+          </div>
+
+          <div class="metric">
+            <div class="metric-value">€8.4k</div>
+            <div class="metric-label">Oggi</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TICKET ATTIVI -->
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Ticket attivi</h2>
+            <div class="section-subtitle">Vendite dirette NightOut e liste PR</div>
+          </div>
+          <button class="show-all">Mostra tutto</button>
+        </div>
+
+        <div class="carousel">
+          <article
+            class="seller-card featured js-open-detail"
+            data-name="NightOut App"
+            data-type="Vendita diretta"
+            data-mode="ticket"
+            data-ticket="86"
+            data-list="86"
+            data-revenue="€1.290"
+            data-checkin="71"
+            data-promo="-30% ingresso"
+          >
+            <div class="seller-top">
+              <div>
+                <div class="seller-name">NightOut App</div>
+                <div class="seller-type">Utenti senza PR</div>
+              </div>
+              <span class="badge">Direct</span>
+            </div>
+
+            <div class="seller-stats">
+              <div class="seller-stat">
+                <div class="seller-stat-value">86</div>
+                <div class="seller-stat-label">Ticket</div>
+              </div>
+
+              <div class="seller-stat">
+                <div class="seller-stat-value">€1.2k</div>
+                <div class="seller-stat-label">Incasso</div>
+              </div>
+
+              <div class="seller-stat">
+                <div class="seller-stat-value">71</div>
+                <div class="seller-stat-label">Check-in</div>
+              </div>
+
+              <div class="seller-stat">
+                <div class="seller-stat-value">€15</div>
+                <div class="seller-stat-label">Medio</div>
+              </div>
+            </div>
+
+            <div class="promo-line">
+              <span class="promo-dot"></span>
+              Promo: -30% ingresso
+            </div>
+          </article>
+
+          <article
+            class="seller-card js-open-detail"
+            data-name="PR Marco"
+            data-type="Lista Marco"
+            data-mode="ticket"
+            data-ticket="42"
+            data-list="58"
+            data-revenue="€630"
+            data-checkin="31"
+            data-promo="Donna free entro 00:30"
+          >
+            <div class="seller-top">
+              <div>
+                <div class="seller-name">PR Marco</div>
+                <div class="seller-type">Lista Marco</div>
+              </div>
+              <span class="badge dark">PR</span>
+            </div>
+
+            <div class="seller-stats">
+              <div class="seller-stat">
+                <div class="seller-stat-value">42</div>
+                <div class="seller-stat-label">Ticket</div>
+              </div>
+
+              <div class="seller-stat">
+                <div class="seller-stat-value">€630</div>
+                <div class="seller-stat-label">Incasso</div>
+              </div>
+
+              <div class="seller-stat">
+                <div class="seller-stat-value">31</div>
+                <div class="seller-stat-label">Check-in</div>
+              </div>
+
+              <div class="seller-stat">
+                <div class="seller-stat-value">€15</div>
+                <div class="seller-stat-label">Medio</div>
+              </div>
+            </div>
+
+            <div class="promo-line">
+              <span class="promo-dot"></span>
+              Promo: Donna free 00:30
+            </div>
+          </article>
+
+          <article
+            class="seller-card js-open-detail"
+            data-name="PR Giulia"
+            data-type="Lista Giulia"
+            data-mode="ticket"
+            data-ticket="37"
+            data-list="44"
+            data-revenue="€555"
+            data-checkin="29"
+            data-promo="Early bird €10"
+          >
+            <div class="seller-top">
+              <div>
+                <div class="seller-name">PR Giulia</div>
+                <div class="seller-type">Lista Giulia</div>
+              </div>
+              <span class="badge dark">PR</span>
+            </div>
+
+            <div class="seller-stats">
+              <div class="seller-stat">
+                <div class="seller-stat-value">37</div>
+                <div class="seller-stat-label">Ticket</div>
+              </div>
+
+              <div class="seller-stat">
+                <div class="seller-stat-value">€555</div>
+                <div class="seller-stat-label">Incasso</div>
+              </div>
+
+              <div class="seller-stat">
+                <div class="seller-stat-value">29</div>
+                <div class="seller-stat-label">Check-in</div>
+              </div>
+
+              <div class="seller-stat">
+                <div class="seller-stat-value">€15</div>
+                <div class="seller-stat-label">Medio</div>
+              </div>
+            </div>
+
+            <div class="promo-line">
+              <span class="promo-dot"></span>
+              Promo: Early bird €10
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- TAVOLI ATTIVI -->
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Tavoli attivi</h2>
+            <div class="section-subtitle">Prenotazioni, depositi e ospiti previsti</div>
+          </div>
+          <button class="show-all">Mostra tutto</button>
+        </div>
+
+        <div class="carousel">
+          <article
+            class="seller-card featured js-open-detail"
+            data-name="NightOut App"
+            data-type="Tavoli diretti"
+            data-mode="table"
+            data-ticket="5"
+            data-list="34 ospiti"
+            data-revenue="€1.800"
+            data-checkin="€450"
+            data-promo="Bottle deal"
+          >
+            <div class="seller-top">
+              <div>
+                <div class="seller-name">NightOut App</div>
+                <div class="seller-type">Tavoli diretti</div>
+              </div>
+              <span class="badge green">Direct</span>
+            </div>
+
+            <div class="seller-stats">
+              <div class="seller-stat">
+                <div class="seller-stat-value">5</div>
+                <div class="seller-stat-label">Tavoli</div>
+              </div>
+
+              <div class="seller-stat">
+                <div class="seller-stat-value">€1.8k</div>
+                <div class="seller-stat-label">Valore</div>
+              </div>
+
+              <div class="seller-stat">
+                <div class="seller-stat-value">34</div>
+                <div class="seller-stat-label">Ospiti</div>
+              </div>
+
+              <div class="seller-stat">
+                <div class="seller-stat-value">€450</div>
+                <div class="seller-stat-label">Depositi</div>
+              </div>
+            </div>
+
+            <div class="promo-line">
+              <span class="promo-dot"></span>
+              Promo: Bottle deal
+            </div>
+          </article>
+
+          <article
+            class="seller-card js-open-detail"
+            data-name="PR Marco"
+            data-type="Tavoli Marco"
+            data-mode="table"
+            data-ticket="4"
+            data-list="28 ospiti"
+            data-revenue="€1.400"
+            data-checkin="€350"
+            data-promo="Tavolo ridotto"
+          >
+            <div class="seller-top">
+              <div>
+                <div class="seller-name">PR Marco</div>
+                <div class="seller-type">Tavoli Marco</div>
+              </div>
+              <span class="badge dark">PR</span>
+            </div>
+
+            <div class="seller-stats">
+              <div class="seller-stat">
+                <div class="seller-stat-value">4</div>
+                <div class="seller-stat-label">Tavoli</div>
+              </div>
+
+              <div class="seller-stat">
+                <div class="seller-stat-value">€1.4k</div>
+                <div class="seller-stat-label">Valore</div>
+              </div>
+
+              <div class="seller-stat">
+                <div class="seller-stat-value">28</div>
+                <div class="seller-stat-label">Ospiti</div>
+              </div>
+
+              <div class="seller-stat">
+                <div class="seller-stat-value">3/4</div>
+                <div class="seller-stat-label">Confermati</div>
+              </div>
+            </div>
+
+            <div class="promo-line">
+              <span class="promo-dot"></span>
+              Promo: Tavolo ridotto
+            </div>
+          </article>
+
+          <article
+            class="seller-card js-open-detail"
+            data-name="Organizer Luca"
+            data-type="Tavoli Organizer"
+            data-mode="table"
+            data-ticket="3"
+            data-list="22 ospiti"
+            data-revenue="€950"
+            data-checkin="€250"
+            data-promo="Student deal"
+          >
+            <div class="seller-top">
+              <div>
+                <div class="seller-name">Organizer Luca</div>
+                <div class="seller-type">Gruppi esterni</div>
+              </div>
+              <span class="badge yellow">Org.</span>
+            </div>
+
+            <div class="seller-stats">
+              <div class="seller-stat">
+                <div class="seller-stat-value">3</div>
+                <div class="seller-stat-label">Tavoli</div>
+              </div>
+
+              <div class="seller-stat">
+                <div class="seller-stat-value">€950</div>
+                <div class="seller-stat-label">Valore</div>
+              </div>
+
+              <div class="seller-stat">
+                <div class="seller-stat-value">22</div>
+                <div class="seller-stat-label">Ospiti</div>
+              </div>
+
+              <div class="seller-stat">
+                <div class="seller-stat-value">2/3</div>
+                <div class="seller-stat-label">Confermati</div>
+              </div>
+            </div>
+
+            <div class="promo-line">
+              <span class="promo-dot"></span>
+              Promo: Student deal
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- PERFORMANCE -->
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Performance</h2>
+            <div class="section-subtitle">Vendite, liste, tavoli e insight pubblico</div>
+          </div>
+          <button class="show-all">Report</button>
+        </div>
+
+        <div class="performance-card">
+          <div class="tabs">
+            <button class="tab active" data-tab="vendite">Vendite</button>
+            <button class="tab" data-tab="liste">Liste</button>
+            <button class="tab" data-tab="tavoli">Tavoli</button>
+            <button class="tab" data-tab="insight">Insight</button>
+          </div>
+
+          <div class="perf-grid" id="perfGrid">
+            <div class="perf-box">
+              <div class="perf-label">Incasso totale</div>
+              <div class="perf-value">€8.420</div>
+              <div class="perf-note">+22% vs scorsa serata</div>
+            </div>
+
+            <div class="perf-box">
+              <div class="perf-label">Canale migliore</div>
+              <div class="perf-value">PR Marco</div>
+              <div class="perf-note">€2.030 generati</div>
+            </div>
+
+            <div class="perf-box">
+              <div class="perf-label">Promo usate</div>
+              <div class="perf-value">148</div>
+              <div class="perf-note">-30% ingresso leader</div>
+            </div>
+
+            <div class="perf-box">
+              <div class="perf-label">Check-in rate</div>
+              <div class="perf-value">78%</div>
+              <div class="perf-note">194 entrati su 248</div>
+            </div>
+          </div>
+
+          <div class="insight-panel">
+            <div class="chart-head">
+              <div class="chart-title">Vendite per canale</div>
+              <div class="chart-note">Serata selezionata</div>
+            </div>
+
+            <div class="bars">
+              <div class="bar-wrap">
+                <div class="bar" style="height:68%"></div>
+                <div class="bar-label">App</div>
+              </div>
+              <div class="bar-wrap">
+                <div class="bar" style="height:92%"></div>
+                <div class="bar-label">Marco</div>
+              </div>
+              <div class="bar-wrap">
+                <div class="bar" style="height:74%"></div>
+                <div class="bar-label">Giulia</div>
+              </div>
+              <div class="bar-wrap">
+                <div class="bar" style="height:58%"></div>
+                <div class="bar-label">Luca</div>
+              </div>
+              <div class="bar-wrap">
+                <div class="bar" style="height:44%"></div>
+                <div class="bar-label">Org</div>
+              </div>
+            </div>
+
+            <div class="insight-grid">
+              <div class="insight-box">
+                <div class="insight-title">Distribuzione sesso</div>
+                <div class="insight-main">54% M · 46% F</div>
+                <div class="split">
+                  <div class="a" style="width:54%"></div>
+                  <div class="b" style="width:46%"></div>
+                </div>
+              </div>
+
+              <div class="insight-box">
+                <div class="insight-title">Età media</div>
+                <div class="insight-main">23.8 anni</div>
+              </div>
+
+              <div class="insight-box">
+                <div class="insight-title">Pregame</div>
+                <div class="insight-main">64 persone</div>
+              </div>
+
+              <div class="insight-box">
+                <div class="insight-title">Promo leader</div>
+                <div class="insight-main">-30%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- SEARCH DOCK -->
+    <section class="search-dock">
+      <div class="search-panel">
+        <div class="search-row">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M11 19a8 8 0 1 1 5.29-14.01A8 8 0 0 1 11 19Z" stroke="currentColor" stroke-width="2"/>
+            <path d="m20 20-4.2-4.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <input class="search-input" type="text" placeholder="Cerca PR, ticket, promo, data..." />
+        </div>
+
+        <div class="chips">
+          <button class="chip active">Oggi</button>
+          <button class="chip">Data</button>
+          <button class="chip">PR</button>
+          <button class="chip">Promo</button>
+          <button class="chip">Ticket</button>
+          <button class="chip">Tavoli</button>
+          <button class="chip">Check-in</button>
+          <button class="chip">Pregame</button>
+          <button class="chip">Problemi</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+      <button class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M3.5 10.5 12 3l8.5 7.5v9a1.5 1.5 0 0 1-1.5 1.5h-4.2v-6.2H9.2V21H5a1.5 1.5 0 0 1-1.5-1.5v-9Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        </svg>
+        Home
+      </button>
+
+      <button class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v1.2a2.3 2.3 0 0 0 0 4.6v3.2A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-3.2a2.3 2.3 0 0 0 0-4.6V7.5Z" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        Vendite
+      </button>
+
+      <button class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M8 7h12M8 12h12M8 17h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M4 7h.01M4 12h.01M4 17h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        Liste
+      </button>
+
+      <button class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M5 20h14M7 20V8a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v12M9 10h6M9 14h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Tavoli
+      </button>
+
+      <button class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M5 19V5M5 19h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M9 16v-5M13 16V8M17 16v-8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Insight
+      </button>
+    </nav>
+
+    <!-- DETAIL SHEET -->
+    <section class="detail-sheet" id="detailSheet">
+      <div class="sheet-content">
+        <div class="sheet-hero">
+          <button class="close-btn" id="closeSheet" aria-label="Chiudi">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+          </button>
+
+          <div class="sheet-kicker" id="sheetType">Lista Marco</div>
+          <div class="sheet-title" id="sheetTitle">PR Marco</div>
+
+          <div class="sheet-meta">
+            <span class="badge" id="sheetMode">Ticket</span>
+            <span class="badge dark" id="sheetPromo">Promo attiva</span>
+          </div>
+        </div>
+
+        <div class="sheet-body">
+          <div class="detail-grid">
+            <div class="detail-box">
+              <div class="detail-label" id="box1Label">Ticket venduti</div>
+              <div class="detail-value" id="box1Value">42</div>
+            </div>
+
+            <div class="detail-box">
+              <div class="detail-label" id="box2Label">Persone in lista</div>
+              <div class="detail-value" id="box2Value">58</div>
+            </div>
+
+            <div class="detail-box">
+              <div class="detail-label">Incasso</div>
+              <div class="detail-value" id="box3Value">€630</div>
+            </div>
+
+            <div class="detail-box">
+              <div class="detail-label" id="box4Label">Check-in</div>
+              <div class="detail-value" id="box4Value">31</div>
+            </div>
+          </div>
+
+          <div class="table">
+            <div class="table-title" id="tableTitle">Dettaglio lista e promo usate</div>
+
+            <div class="row head">
+              <div class="cell">Cliente</div>
+              <div class="cell">Prezzo</div>
+              <div class="cell">Promo</div>
+              <div class="cell">Stato</div>
+            </div>
+
+            <div class="row">
+              <div class="cell">Luca R.</div>
+              <div class="cell">€15</div>
+              <div class="cell">Nessuna</div>
+              <div class="cell"><span class="status">Entrato</span></div>
+            </div>
+
+            <div class="row">
+              <div class="cell">Sara M.</div>
+              <div class="cell">€0</div>
+              <div class="cell">Donna free</div>
+              <div class="cell"><span class="status">Entrata</span></div>
+            </div>
+
+            <div class="row">
+              <div class="cell">Marco F.</div>
+              <div class="cell">€10</div>
+              <div class="cell">Early bird</div>
+              <div class="cell"><span class="status pending">Pending</span></div>
+            </div>
+
+            <div class="row">
+              <div class="cell">Giulia C.</div>
+              <div class="cell">€15</div>
+              <div class="cell">-30%</div>
+              <div class="cell"><span class="status">Entrata</span></div>
+            </div>
+          </div>
+
+          <div class="action-row">
+            <button class="primary-btn">Esporta lista</button>
+            <button class="secondary-btn">Vedi insight</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const detailSheet = document.getElementById("detailSheet");
+    const closeSheet = document.getElementById("closeSheet");
+
+    const sheetTitle = document.getElementById("sheetTitle");
+    const sheetType = document.getElementById("sheetType");
+    const sheetMode = document.getElementById("sheetMode");
+    const sheetPromo = document.getElementById("sheetPromo");
+
+    const box1Label = document.getElementById("box1Label");
+    const box2Label = document.getElementById("box2Label");
+    const box4Label = document.getElementById("box4Label");
+
+    const box1Value = document.getElementById("box1Value");
+    const box2Value = document.getElementById("box2Value");
+    const box3Value = document.getElementById("box3Value");
+    const box4Value = document.getElementById("box4Value");
+
+    const tableTitle = document.getElementById("tableTitle");
+
+    document.querySelectorAll(".js-open-detail").forEach(card => {
+      card.addEventListener("click", () => {
+        const mode = card.dataset.mode;
+
+        sheetTitle.textContent = card.dataset.name;
+        sheetType.textContent = card.dataset.type;
+        sheetMode.textContent = mode === "table" ? "Tavoli" : "Ticket";
+        sheetPromo.textContent = card.dataset.promo;
+
+        if (mode === "table") {
+          box1Label.textContent = "Tavoli venduti";
+          box2Label.textContent = "Ospiti previsti";
+          box4Label.textContent = "Depositi";
+          tableTitle.textContent = "Dettaglio tavoli, promo e stato";
+
+          box1Value.textContent = card.dataset.ticket;
+          box2Value.textContent = card.dataset.list;
+          box3Value.textContent = card.dataset.revenue;
+          box4Value.textContent = card.dataset.checkin;
+        } else {
+          box1Label.textContent = "Ticket venduti";
+          box2Label.textContent = "Persone in lista";
+          box4Label.textContent = "Check-in";
+          tableTitle.textContent = "Dettaglio lista e promo usate";
+
+          box1Value.textContent = card.dataset.ticket;
+          box2Value.textContent = card.dataset.list;
+          box3Value.textContent = card.dataset.revenue;
+          box4Value.textContent = card.dataset.checkin;
+        }
+
+        detailSheet.classList.add("open");
+      });
+    });
+
+    closeSheet.addEventListener("click", () => {
+      detailSheet.classList.remove("open");
+    });
+
+    detailSheet.addEventListener("click", event => {
+      if (event.target === detailSheet) {
+        detailSheet.classList.remove("open");
+      }
+    });
+
+    document.querySelectorAll(".chip").forEach(chip => {
+      chip.addEventListener("click", () => {
+        document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+        chip.classList.add("active");
+      });
+    });
+
+    const tabData = {
+      vendite: [
+        ["Incasso totale", "€8.420", "+22% vs scorsa serata"],
+        ["Canale migliore", "PR Marco", "€2.030 generati"],
+        ["Promo usate", "148", "-30% ingresso leader"],
+        ["Check-in rate", "78%", "194 entrati su 248"]
+      ],
+      liste: [
+        ["Persone in lista", "310", "194 check-in reali"],
+        ["No-show", "116", "37% non arrivati"],
+        ["Lista migliore", "NightOut App", "71 check-in"],
+        ["Promo più usata", "Donna free", "41 utilizzi"]
+      ],
+      tavoli: [
+        ["Tavoli totali", "18", "14 confermati"],
+        ["Valore tavoli", "€4.150", "€1.050 depositi"],
+        ["Ospiti previsti", "112", "28 da PR Marco"],
+        ["Pending", "4", "Da confermare"]
+      ],
+      insight: [
+        ["Sesso", "54% M", "46% F"],
+        ["Età media", "23.8", "21–24 fascia leader"],
+        ["Pregame", "64", "26% dei presenti"],
+        ["Acquisizione", "52% PR", "35% NightOut App"]
+      ]
+    };
+
+    const perfGrid = document.getElementById("perfGrid");
+
+    document.querySelectorAll(".tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+
+        const selected = tab.dataset.tab;
+        const data = tabData[selected];
+
+        perfGrid.innerHTML = data.map(item => `
+          <div class="perf-box">
+            <div class="perf-label">${item[0]}</div>
+            <div class="perf-value">${item[1]}</div>
+            <div class="perf-note">${item[2]}</div>
+          </div>
+        `).join("");
+      });
+    });
+  </script>
+</body>
+</html>
