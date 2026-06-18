@@ -1,121 +1,87 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import { useEffect, useMemo, useState } from 'react'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { nightoutApi } from './api/nightoutApi'
+import { AppShell } from './components/AppShell'
+import { DiscoveryFeedPage } from './pages/DiscoveryFeedPage'
+import { EventDetailPage } from './pages/EventDetailPage'
+import { ManagerDashboardPage } from './pages/ManagerDashboardPage'
+import { NotFoundPage } from './pages/NotFoundPage'
+import { PregamePage } from './pages/PregamePage'
+import { ProfilePage } from './pages/ProfilePage'
+import { RoleSelectionPage } from './pages/RoleSelectionPage'
+import { TicketPurchasePage } from './pages/TicketPurchasePage'
+import { TicketsPage } from './pages/TicketsPage'
+import { TransportPage } from './pages/TransportPage'
+import { SessionContext } from './session'
+import type { UserDto, UserRole } from './types/nightout'
 import './App.css'
 
+const storedRoleKey = 'nightout-demo-role'
+
 function App() {
-  const [count, setCount] = useState(0)
+  const [user, setUser] = useState<UserDto | null>(null)
+  const [loadingSession, setLoadingSession] = useState(true)
+
+  useEffect(() => {
+    const role = localStorage.getItem(storedRoleKey) as UserRole | null
+    if (!role) {
+      setLoadingSession(false)
+      return
+    }
+    nightoutApi
+      .getSession(role)
+      .then(setUser)
+      .catch(() => localStorage.removeItem(storedRoleKey))
+      .finally(() => setLoadingSession(false))
+  }, [])
+
+  const session = useMemo(
+    () => ({
+      user,
+      loadingSession,
+      async selectRole(role: UserRole) {
+        const nextUser = await nightoutApi.getSession(role)
+        localStorage.setItem(storedRoleKey, role)
+        setUser(nextUser)
+      },
+      resetRole() {
+        localStorage.removeItem(storedRoleKey)
+        setUser(null)
+      },
+    }),
+    [user, loadingSession],
+  )
+
+  if (loadingSession) {
+    return (
+      <div className="boot-screen">
+        <strong>NightOUT</strong>
+        <span>Loading demo session</span>
+      </div>
+    )
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+    <SessionContext.Provider value={session}>
+      <BrowserRouter>
+        <Routes>
+          <Route element={<AppShell user={user} onResetRole={session.resetRole} />}>
+            <Route path="/role" element={<RoleSelectionPage />} />
+            <Route path="/" element={user ? <Navigate to="/feed" replace /> : <Navigate to="/role" replace />} />
+            <Route path="/feed" element={user ? <DiscoveryFeedPage /> : <Navigate to="/role" replace />} />
+            <Route path="/events/:id" element={user ? <EventDetailPage /> : <Navigate to="/role" replace />} />
+            <Route path="/checkout/:eventId" element={user ? <TicketPurchasePage /> : <Navigate to="/role" replace />} />
+            <Route path="/tickets" element={user ? <TicketsPage /> : <Navigate to="/role" replace />} />
+            <Route path="/pregames" element={user ? <PregamePage /> : <Navigate to="/role" replace />} />
+            <Route path="/transport" element={user ? <TransportPage /> : <Navigate to="/role" replace />} />
+            <Route path="/transport/:eventId" element={user ? <TransportPage /> : <Navigate to="/role" replace />} />
+            <Route path="/manager" element={user ? <ManagerDashboardPage /> : <Navigate to="/role" replace />} />
+            <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/role" replace />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </SessionContext.Provider>
   )
 }
 

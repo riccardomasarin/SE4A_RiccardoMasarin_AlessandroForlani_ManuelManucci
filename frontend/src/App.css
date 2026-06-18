@@ -1,184 +1,686 @@
-.counter {
-  font-size: 16px;
+.app-shell {
+  width: min(100%, 1180px);
+  min-height: 100svh;
+  margin: 0 auto;
+  border-inline: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.top-strip {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 56px;
+  padding: 12px 16px;
+  background: rgba(5, 5, 9, 0.82);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(14px);
+}
+
+.top-strip > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.city-pill,
+.eyebrow,
+.badge,
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
   padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
-  margin-bottom: 24px;
-
-  &:hover {
-    border-color: var(--accent-border);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
+  border: 1px solid rgba(124, 77, 255, 0.65);
+  border-radius: 999px;
+  color: #d7d0ff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
 }
 
-.hero {
-  position: relative;
-
-  .base,
-  .framework,
-  .vite {
-    inset-inline: 0;
-    margin: 0 auto;
-  }
-
-  .base {
-    width: 170px;
-    position: relative;
-    z-index: 0;
-  }
-
-  .framework,
-  .vite {
-    position: absolute;
-  }
-
-  .framework {
-    z-index: 1;
-    top: 34px;
-    height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
-  }
-
-  .vite {
-    z-index: 0;
-    top: 107px;
-    height: 26px;
-    width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
-  }
-}
-
-#center {
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-  place-content: center;
+.avatar-button,
+.small-action {
+  display: inline-grid;
   place-items: center;
-  flex-grow: 1;
-
-  @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  }
+  min-width: 38px;
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--text);
+  background: var(--surface-2);
+  cursor: pointer;
 }
 
-#next-steps {
-  display: flex;
-  border-top: 1px solid var(--border);
+.avatar-button span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--pink), var(--blue));
+  font-weight: 800;
+}
+
+.screen {
+  min-height: calc(100svh - 56px);
+  padding: 16px;
+}
+
+.screen.with-nav {
+  padding-bottom: 92px;
+}
+
+.bottom-nav {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 30;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  width: min(100%, 1180px);
+  min-height: 72px;
+  margin: 0 auto;
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+  background: rgba(5, 5, 9, 0.94);
+  border-top: 1px solid var(--line);
+  backdrop-filter: blur(18px);
+}
+
+.bottom-nav a {
+  display: grid;
+  place-items: center;
+  gap: 3px;
+  color: #7f8391;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.bottom-nav b {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid currentColor;
+  border-radius: 7px;
+  font-size: 12px;
+}
+
+.bottom-nav a.active {
+  color: var(--violet);
+}
+
+.boot-screen,
+.state-block,
+.role-screen {
+  display: grid;
+  place-items: center;
+  min-height: 80svh;
+  padding: 28px 16px;
+  text-align: center;
+}
+
+.boot-screen {
+  gap: 8px;
+}
+
+.boot-screen strong,
+.role-hero h1 {
+  font-size: 42px;
+}
+
+.boot-screen span,
+.role-hero p,
+.state-block p,
+.page-header p,
+.event-card p,
+.body-copy,
+.transport-panel p,
+.profile-card p,
+.checkout-card p,
+.ticket-band p,
+.ticket-body p {
+  color: var(--muted);
+}
+
+.role-screen {
+  gap: 22px;
+}
+
+.role-hero {
+  display: grid;
+  gap: 12px;
+  max-width: 520px;
+}
+
+.role-grid {
+  display: grid;
+  width: min(100%, 720px);
+  gap: 12px;
+}
+
+.role-card {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--text);
   text-align: left;
-
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
-    }
-  }
-
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
+  background: var(--surface);
+  cursor: pointer;
 }
 
-#docs {
-  border-right: 1px solid var(--border);
-
-  @media (max-width: 1024px) {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
+.role-card.selected {
+  border-color: var(--violet);
+  background: linear-gradient(135deg, rgba(124, 77, 255, 0.24), rgba(74, 163, 255, 0.12));
 }
 
-#next-steps ul {
-  list-style: none;
-  padding: 0;
+.role-card span {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.primary-action,
+.secondary-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: var(--radius);
+  color: #fff;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--violet), var(--blue));
+  cursor: pointer;
+}
+
+.secondary-action {
+  color: var(--text);
+  background: var(--surface-3);
+}
+
+.page-stack {
+  display: grid;
+  gap: 18px;
+}
+
+.page-header,
+.section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.page-header h1 {
+  font-size: clamp(28px, 7vw, 44px);
+  line-height: 1.05;
+}
+
+.section-heading h2,
+.section-block h2 {
+  font-size: 20px;
+}
+
+.section-heading a,
+.section-heading span {
+  color: #a997ff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.search-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+
+.search-row input {
+  min-width: 0;
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--text);
+  background: var(--surface);
+}
+
+.search-row button,
+.chip-row button,
+.action-grid button,
+.action-grid a,
+.pregame-card button,
+.ticket-options button {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--text);
+  background: var(--surface-2);
+  cursor: pointer;
+}
+
+.search-row button {
+  min-height: 46px;
+  padding: 0 14px;
+}
+
+.chip-row {
   display: flex;
   gap: 8px;
-  margin: 32px 0 0;
-
-  .logo {
-    height: 18px;
-  }
-
-  a {
-    color: var(--text-h);
-    font-size: 16px;
-    border-radius: 6px;
-    background: var(--social-bg);
-    display: flex;
-    padding: 6px 12px;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: box-shadow 0.3s;
-
-    &:hover {
-      box-shadow: var(--shadow);
-    }
-    .button-icon {
-      height: 18px;
-      width: 18px;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    margin-top: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    li {
-      flex: 1 1 calc(50% - 8px);
-    }
-
-    a {
-      width: 100%;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-  }
+  overflow-x: auto;
+  padding-bottom: 2px;
 }
 
-#spacer {
-  height: 88px;
-  border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
-    height: 48px;
-  }
+.chip-row button,
+.chip-row span {
+  white-space: nowrap;
 }
 
-.ticks {
+.chip.active {
+  color: white;
+  background: linear-gradient(135deg, var(--violet), var(--blue));
+}
+
+.spotlight-carousel,
+.horizontal-list {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(230px, 72%);
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 4px;
+}
+
+.section-block {
+  display: grid;
+  gap: 12px;
+}
+
+.event-list,
+.ticket-list,
+.compact-list,
+.channel-list {
+  display: grid;
+  gap: 12px;
+}
+
+.event-card,
+.pregame-card,
+.ticket-card,
+.checkout-card,
+.transport-panel,
+.transport-card,
+.manager-event,
+.channel-card,
+.profile-card,
+.list-tile,
+.ticket-row,
+.metric-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.event-card {
   position: relative;
+  display: grid;
+  min-height: 310px;
+  overflow: hidden;
+  scroll-snap-align: start;
+}
+
+.event-card.compact {
+  min-height: 230px;
+}
+
+.event-card img {
   width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
 
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: -4.5px;
-    border: 5px solid transparent;
+.event-card.compact img {
+  height: 132px;
+}
+
+.event-card-body {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+}
+
+.event-card h3 {
+  margin-top: 8px;
+  font-size: 18px;
+}
+
+.event-card-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.event-card-meta strong {
+  color: #9b8bff;
+}
+
+.detail-hero {
+  width: calc(100% + 32px);
+  height: min(48svh, 430px);
+  margin: -16px -16px 0;
+  object-fit: cover;
+}
+
+.detail-title {
+  display: grid;
+  gap: 10px;
+}
+
+.detail-title h1 {
+  font-size: clamp(30px, 9vw, 54px);
+}
+
+.action-grid,
+.info-grid,
+.manager-grid,
+.insight-grid,
+.ticket-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.action-grid > * {
+  display: grid;
+  place-items: center;
+  min-height: 56px;
+  font-weight: 800;
+}
+
+.info-grid {
+  grid-template-columns: 1fr;
+}
+
+.metric-card {
+  display: grid;
+  gap: 4px;
+  min-height: 86px;
+  padding: 14px;
+}
+
+.metric-card strong {
+  font-size: 22px;
+}
+
+.metric-card span,
+.metric-card small,
+.list-tile span,
+.transport-card span,
+.transport-card p,
+.channel-card span,
+.channel-card p,
+.ticket-row span,
+.ticket-row small {
+  color: var(--muted);
+}
+
+.body-copy {
+  line-height: 1.6;
+}
+
+.vibe-bars {
+  display: grid;
+  gap: 10px;
+}
+
+.vibe-row {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.vibe-row div {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #202028;
+}
+
+.vibe-row i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--violet), var(--blue));
+}
+
+.sticky-action {
+  position: sticky;
+  bottom: 86px;
+  z-index: 5;
+}
+
+.pregame-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.pregame-card {
+  overflow: hidden;
+}
+
+.pregame-card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.pregame-card div {
+  display: grid;
+  gap: 7px;
+  padding: 12px;
+}
+
+.pregame-card button {
+  min-height: 40px;
+  color: white;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--violet), var(--blue));
+}
+
+.transport-panel,
+.transport-card,
+.checkout-card,
+.manager-event,
+.channel-card,
+.list-tile,
+.ticket-row,
+.profile-card {
+  padding: 16px;
+}
+
+.transport-panel {
+  background: linear-gradient(135deg, rgba(64, 217, 130, 0.16), rgba(74, 163, 255, 0.12));
+}
+
+.transport-card,
+.list-tile,
+.ticket-row {
+  display: grid;
+  gap: 6px;
+}
+
+.manager-event {
+  background: linear-gradient(135deg, rgba(124, 77, 255, 0.22), rgba(255, 79, 139, 0.1));
+}
+
+.manager-event span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.channel-card {
+  display: grid;
+  gap: 12px;
+}
+
+.channel-stats {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  justify-content: start;
+  gap: 8px;
+}
+
+.ticket-options {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.ticket-options button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 58px;
+  padding: 0 14px;
+}
+
+.ticket-options .selected {
+  border-color: var(--violet);
+  background: rgba(124, 77, 255, 0.2);
+}
+
+.ticket-card {
+  overflow: hidden;
+  background: #13102a;
+}
+
+.ticket-band {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px;
+  background: linear-gradient(135deg, var(--violet), var(--blue));
+}
+
+.ticket-band span {
+  align-self: flex-start;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.ticket-body {
+  display: grid;
+  gap: 18px;
+  padding: 18px;
+}
+
+.ticket-grid {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 14px 0;
+}
+
+.ticket-grid span {
+  display: grid;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.ticket-grid strong {
+  color: var(--text);
+  font-size: 14px;
+  text-transform: none;
+}
+
+.qr-box {
+  display: grid;
+  place-items: center;
+  width: 160px;
+  min-height: 160px;
+  margin: 0 auto;
+  padding: 14px;
+  border-radius: var(--radius);
+  color: #111;
+  overflow-wrap: anywhere;
+  text-align: center;
+  background:
+    linear-gradient(90deg, #111 10px, transparent 10px) 0 0 / 24px 24px,
+    linear-gradient(#111 10px, transparent 10px) 0 0 / 24px 24px,
+    white;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.profile-avatar {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--pink), var(--blue));
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.inline-error {
+  padding: 12px;
+  border: 1px solid rgba(255, 79, 139, 0.45);
+  border-radius: var(--radius);
+  color: #ffc7d9;
+  background: rgba(255, 79, 139, 0.12);
+}
+
+@media (min-width: 760px) {
+  .screen {
+    padding: 24px;
   }
 
-  &::before {
-    left: 0;
-    border-left-color: var(--border);
+  .screen.with-nav {
+    padding-bottom: 110px;
   }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
+
+  .role-grid,
+  .pregame-grid,
+  .event-list,
+  .channel-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .spotlight-carousel,
+  .horizontal-list {
+    grid-auto-columns: 300px;
+  }
+
+  .info-grid,
+  .manager-grid,
+  .insight-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .event-card.compact {
+    min-height: 260px;
   }
 }
