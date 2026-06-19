@@ -7,11 +7,14 @@ import com.nightout.backend.dto.VenueDto;
 import com.nightout.backend.entity.Event;
 import com.nightout.backend.entity.MusicGenre;
 import com.nightout.backend.entity.ReturnTransportOption;
+import com.nightout.backend.entity.VenueCategory;
 import com.nightout.backend.repository.EventRepository;
 import com.nightout.backend.repository.ReturnTransportOptionRepository;
 import com.nightout.backend.repository.VenueRepository;
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,13 +35,22 @@ public class EventService {
     }
 
     @Transactional(readOnly = true)
-    public List<EventSummaryDto> findEvents(String city, String area, MusicGenre genre, Double maxPrice,
-            Boolean featured, String sort) {
+    public List<EventSummaryDto> findEvents(String city, String area, MusicGenre genre, VenueCategory venueCategory,
+            LocalDate date, LocalDate fromDate, LocalDate toDate, Double minPrice, Double maxPrice,
+            String entryCondition, String search, Boolean featured, String sort) {
+        String normalizedEntryCondition = normalize(entryCondition);
+        String normalizedSearch = normalize(search);
         return eventRepository.findAll().stream()
-                .filter(event -> city == null || event.getVenue().getCity().equalsIgnoreCase(city))
-                .filter(event -> area == null || event.getVenue().getArea().equalsIgnoreCase(area))
+                .filter(event -> matchesText(event.getVenue().getCity(), city))
+                .filter(event -> matchesText(event.getVenue().getArea(), area))
                 .filter(event -> genre == null || event.getMusicGenre() == genre)
+                .filter(event -> venueCategory == null || event.getVenue().getCategory() == venueCategory)
+                .filter(event -> matchesDate(event, date, fromDate, toDate))
+                .filter(event -> minPrice == null || event.getPrice() >= minPrice)
                 .filter(event -> maxPrice == null || event.getPrice() <= maxPrice)
+                .filter(event -> normalizedEntryCondition.isBlank()
+                        || normalize(event.getEntryCondition()).contains(normalizedEntryCondition))
+                .filter(event -> matchesSearch(event, normalizedSearch))
                 .filter(event -> featured == null || event.isFeatured() == featured)
                 .sorted(comparatorFor(sort))
                 .map(mapper::toEventSummaryDto)
@@ -81,5 +93,32 @@ public class EventService {
             return Comparator.comparing(Event::getPrice);
         }
         return Comparator.comparing(Event::getStartsAt);
+    }
+
+    private boolean matchesDate(Event event, LocalDate date, LocalDate fromDate, LocalDate toDate) {
+        LocalDate eventDate = event.getStartsAt().toLocalDate();
+        if (date != null && !eventDate.equals(date)) {
+            return false;
+        }
+        if (fromDate != null && eventDate.isBefore(fromDate)) {
+            return false;
+        }
+        return toDate == null || !eventDate.isAfter(toDate);
+    }
+
+    private boolean matchesSearch(Event event, String normalizedSearch) {
+        if (normalizedSearch.isBlank()) {
+            return true;
+        }
+        return normalize(event.getTitle()).contains(normalizedSearch)
+                || normalize(event.getVenue().getName()).contains(normalizedSearch);
+    }
+
+    private boolean matchesText(String actual, String expected) {
+        return expected == null || expected.isBlank() || actual.equalsIgnoreCase(expected);
+    }
+
+    private String normalize(String value) {
+        return value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
     }
 }

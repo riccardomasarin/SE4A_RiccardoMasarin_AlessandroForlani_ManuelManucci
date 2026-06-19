@@ -11,4 +11,6 @@ public interface EventParticipationRepository extends JpaRepository<EventPartici
     List<EventParticipation> findByEventId(Long eventId);
 
     Optional<EventParticipation> findByUserIdAndEventId(Long userId, Long eventId);
+
+    List<EventParticipation> findByUserIdAndStatusIgnoreCase(Long userId, String status);
 }

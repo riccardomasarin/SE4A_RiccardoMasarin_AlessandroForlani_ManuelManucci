@@ -1,12 +1,16 @@
 package com.nightout.backend.controller;
 
+import com.nightout.backend.dto.EventSummaryDto;
 import com.nightout.backend.dto.ProfileDto;
+import com.nightout.backend.dto.SavedEventDto;
 import com.nightout.backend.dto.UserDto;
 import com.nightout.backend.entity.UserRole;
 import com.nightout.backend.service.UserService;
 import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,5 +38,25 @@ public class UserController {
     @GetMapping("/{userId}/profile")
     public ProfileDto getProfile(@PathVariable Long userId) {
         return userService.getProfile(userId);
+    }
+
+    @GetMapping("/{userId}/saved-events")
+    public List<EventSummaryDto> getSavedEvents(@PathVariable Long userId) {
+        return userService.findSavedEvents(userId);
+    }
+
+    @GetMapping("/{userId}/saved-events/{eventId}")
+    public SavedEventDto getSavedEvent(@PathVariable Long userId, @PathVariable Long eventId) {
+        return userService.getSavedEvent(userId, eventId);
+    }
+
+    @PostMapping("/{userId}/saved-events/{eventId}")
+    public SavedEventDto saveEvent(@PathVariable Long userId, @PathVariable Long eventId) {
+        return userService.saveEvent(userId, eventId);
+    }
+
+    @DeleteMapping("/{userId}/saved-events/{eventId}")
+    public SavedEventDto unsaveEvent(@PathVariable Long userId, @PathVariable Long eventId) {
+        return userService.unsaveEvent(userId, eventId);
     }
 }
