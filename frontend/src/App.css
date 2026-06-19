@@ -364,7 +364,8 @@
 .event-list,
 .ticket-list,
 .compact-list,
-.channel-list {
+.channel-list,
+.notification-list {
   display: grid;
   gap: 12px;
 }
@@ -380,7 +381,8 @@
 .profile-card,
 .list-tile,
 .ticket-row,
-.metric-card {
+.metric-card,
+.notification-card {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface);
@@ -565,6 +567,11 @@
   object-fit: cover;
 }
 
+.pregame-card-link,
+.pregame-card-title {
+  display: block;
+}
+
 .pregame-card div {
   display: grid;
   gap: 7px;
@@ -576,6 +583,69 @@
   color: white;
   font-weight: 800;
   background: linear-gradient(135deg, var(--violet), var(--blue));
+}
+
+.pregame-card button:disabled,
+.pregame-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.pregame-detail-hero {
+  width: calc(100% + 32px);
+  height: min(42svh, 380px);
+  margin: -16px -16px 0;
+  object-fit: cover;
+}
+
+.pregame-detail-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 12px;
+}
+
+.pregame-detail-header h1 {
+  margin-top: 8px;
+  font-size: clamp(30px, 8vw, 48px);
+  line-height: 1.05;
+}
+
+.pregame-detail-header p {
+  color: var(--muted);
+}
+
+.pregame-actions {
+  display: grid;
+}
+
+.participant-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.participant-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 6px 10px 6px 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.participant-chip b {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--pink), var(--blue));
 }
 
 .transport-panel,
@@ -602,6 +672,68 @@
 
 .saved-event-tile strong {
   color: #ffffff;
+}
+
+.notification-preview.unread {
+  border-color: rgba(124, 77, 255, 0.55);
+  background: rgba(124, 77, 255, 0.12);
+}
+
+.notification-card {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+}
+
+.notification-card.unread {
+  border-color: rgba(124, 77, 255, 0.65);
+  background: linear-gradient(135deg, rgba(124, 77, 255, 0.18), rgba(74, 163, 255, 0.08));
+}
+
+.notification-card.read {
+  opacity: 0.78;
+}
+
+.notification-card > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.notification-card small,
+.read-label {
+  color: var(--muted);
+}
+
+.notification-type,
+.unread-dot {
+  color: #d7d0ff;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.unread-dot {
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: white;
+  background: rgba(255, 79, 139, 0.75);
+}
+
+.notification-card button {
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: white;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--violet), var(--blue));
+  cursor: pointer;
+}
+
+.notification-card button:disabled {
+  cursor: wait;
+  opacity: 0.65;
 }
 
 .manager-event {

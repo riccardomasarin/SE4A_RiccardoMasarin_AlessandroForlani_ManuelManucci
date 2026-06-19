@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { formatTime } from '../api/format'
 import { nightoutApi } from '../api/nightoutApi'
 import { PageHeader } from '../components/PageHeader'
@@ -92,7 +92,7 @@ export function PregamePage() {
         ) : (
           <div className="pregame-grid">
             {activeRooms.map((room) => (
-              <PregameCard room={room} key={room.id} onJoin={joinRoom} />
+              <PregameCard room={room} key={room.id} userId={user?.id} onJoin={joinRoom} />
             ))}
           </div>
         )}
@@ -105,7 +105,7 @@ export function PregamePage() {
         </div>
         <div className="pregame-grid">
           {officialRooms.map((room) => (
-            <PregameCard room={room} key={room.id} onJoin={joinRoom} />
+            <PregameCard room={room} key={room.id} userId={user?.id} onJoin={joinRoom} />
           ))}
         </div>
       </section>
@@ -113,15 +113,32 @@ export function PregamePage() {
   )
 }
 
-function PregameCard({ room, onJoin }: { room: PregameRoomDto; onJoin: (roomId: number) => void }) {
+function PregameCard({
+  room,
+  userId,
+  onJoin,
+}: {
+  room: PregameRoomDto
+  userId?: number
+  onJoin: (roomId: number) => void
+}) {
+  const isJoined = Boolean(userId && room.participants.some((participant) => participant.id === userId))
+  const isFull = room.currentParticipants >= room.maxParticipants
+
   return (
     <article className="pregame-card">
-      <img src={imageForId(room.id, 'pregame')} alt="" />
+      <Link className="pregame-card-link" to={`/pregames/${room.id}`}>
+        <img src={imageForId(room.id, 'pregame')} alt="" />
+      </Link>
       <div>
-        <h3>{room.title}</h3>
-        <p>{room.meetingLocation} - {formatTime(room.meetingTime)}</p>
-        <span>{room.currentParticipants} / {room.maxParticipants} persone</span>
-        <button type="button" onClick={() => onJoin(room.id)}>Unisciti</button>
+        <Link className="pregame-card-title" to={`/pregames/${room.id}`}>
+          <h3>{room.title}</h3>
+          <p>{room.meetingLocation} - {formatTime(room.meetingTime)}</p>
+          <span>{room.currentParticipants} / {room.maxParticipants} persone</span>
+        </Link>
+        <button type="button" onClick={() => onJoin(room.id)} disabled={isJoined || isFull}>
+          {isJoined ? 'Dentro' : isFull ? 'Piena' : 'Unisciti'}
+        </button>
       </div>
     </article>
   )

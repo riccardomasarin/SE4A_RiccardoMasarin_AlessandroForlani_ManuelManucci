@@ -3,6 +3,7 @@ import type {
   EventDetailDto,
   EventSummaryDto,
   ManagerDashboardDto,
+  NotificationDto,
   PregameRoomDto,
   ProfileDto,
   ReturnTransportDto,
@@ -92,6 +93,11 @@ export const nightoutApi = {
     return response.data
   },
 
+  async getPregame(roomId: number): Promise<PregameRoomDto> {
+    const response = await client.get<PregameRoomDto>(`/pregames/${roomId}`)
+    return response.data
+  },
+
   async createPregame(request: PregameRequest): Promise<PregameRoomDto> {
     const response = await client.post<PregameRoomDto>('/pregames', request)
     return response.data
@@ -99,6 +105,13 @@ export const nightoutApi = {
 
   async joinPregame(roomId: number, userId: number): Promise<PregameRoomDto> {
     const response = await client.post<PregameRoomDto>(`/pregames/${roomId}/join`, undefined, {
+      params: { userId },
+    })
+    return response.data
+  },
+
+  async leavePregame(roomId: number, userId: number): Promise<PregameRoomDto> {
+    const response = await client.post<PregameRoomDto>(`/pregames/${roomId}/leave`, undefined, {
       params: { userId },
     })
     return response.data
@@ -121,6 +134,16 @@ export const nightoutApi = {
 
   async getProfile(userId: number): Promise<ProfileDto> {
     const response = await client.get<ProfileDto>(`/users/${userId}/profile`)
+    return response.data
+  },
+
+  async getNotifications(userId: number): Promise<NotificationDto[]> {
+    const response = await client.get<NotificationDto[]>(`/users/${userId}/notifications`)
+    return response.data
+  },
+
+  async markNotificationRead(notificationId: number): Promise<NotificationDto> {
+    const response = await client.patch<NotificationDto>(`/notifications/${notificationId}/read`)
     return response.data
   },
 

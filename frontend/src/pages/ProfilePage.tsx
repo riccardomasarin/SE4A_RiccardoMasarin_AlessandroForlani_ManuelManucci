@@ -68,17 +68,24 @@ export function ProfilePage() {
       </section>
 
       <section className="section-block">
-        <h2>Biglietti e notifiche</h2>
+        <div className="section-heading">
+          <h2>Biglietti e notifiche</h2>
+          <Link to="/notifications">Vedi tutte</Link>
+        </div>
         <div className="compact-list">
           <Link className="list-tile" to="/tickets">
             <strong>Biglietti attivi</strong>
             <span>{profile.tickets.length} nel profilo</span>
           </Link>
           {profile.notifications.slice(0, 3).map((notification) => (
-            <div className="list-tile" key={notification.id}>
+            <Link
+              className={notification.read ? 'list-tile notification-preview read' : 'list-tile notification-preview unread'}
+              to="/notifications"
+              key={notification.id}
+            >
               <strong>{notification.type}</strong>
               <span>{notification.message}</span>
-            </div>
+            </Link>
           ))}
         </div>
       </section>

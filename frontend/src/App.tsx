@@ -6,7 +6,9 @@ import { DiscoveryFeedPage } from './pages/DiscoveryFeedPage'
 import { EventDetailPage } from './pages/EventDetailPage'
 import { ManagerDashboardPage } from './pages/ManagerDashboardPage'
 import { NotFoundPage } from './pages/NotFoundPage'
+import { NotificationsPage } from './pages/NotificationsPage'
 import { PregamePage } from './pages/PregamePage'
+import { PregameDetailPage } from './pages/PregameDetailPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { RoleSelectionPage } from './pages/RoleSelectionPage'
 import { TicketPurchasePage } from './pages/TicketPurchasePage'
@@ -73,9 +75,11 @@ function App() {
             <Route path="/checkout/:eventId" element={user ? <TicketPurchasePage /> : <Navigate to="/role" replace />} />
             <Route path="/tickets" element={user ? <TicketsPage /> : <Navigate to="/role" replace />} />
             <Route path="/pregames" element={user ? <PregamePage /> : <Navigate to="/role" replace />} />
+            <Route path="/pregames/:roomId" element={user ? <PregameDetailPage /> : <Navigate to="/role" replace />} />
             <Route path="/transport" element={user ? <TransportPage /> : <Navigate to="/role" replace />} />
             <Route path="/transport/:eventId" element={user ? <TransportPage /> : <Navigate to="/role" replace />} />
             <Route path="/manager" element={user ? <ManagerDashboardPage /> : <Navigate to="/role" replace />} />
+            <Route path="/notifications" element={user ? <NotificationsPage /> : <Navigate to="/role" replace />} />
             <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/role" replace />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
