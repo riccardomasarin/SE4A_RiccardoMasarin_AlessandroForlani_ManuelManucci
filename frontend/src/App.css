@@ -54,6 +54,13 @@
   cursor: pointer;
 }
 
+.create-action {
+  width: auto;
+  padding: 0 14px;
+  border-radius: var(--radius);
+  font-weight: 900;
+}
+
 .avatar-button span {
   display: grid;
   place-items: center;
@@ -752,6 +759,47 @@
   gap: 12px;
 }
 
+.manager-form {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.manager-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.manager-form input,
+.manager-form select,
+.manager-form textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.manager-form textarea {
+  min-height: 104px;
+  padding-block: 10px;
+  resize: vertical;
+}
+
+.manager-form .primary-action {
+  margin-top: 4px;
+}
+
 .channel-stats {
   display: grid;
   grid-template-columns: repeat(4, auto);
@@ -969,6 +1017,15 @@
   .manager-grid,
   .insight-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .manager-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .manager-form label:nth-child(2),
+  .manager-form .primary-action {
+    grid-column: 1 / -1;
   }
 
   .event-card.compact {

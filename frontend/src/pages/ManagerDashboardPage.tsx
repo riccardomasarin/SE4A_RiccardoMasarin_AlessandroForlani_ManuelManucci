@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { formatCurrency } from '../api/format'
 import { nightoutApi } from '../api/nightoutApi'
 import { MetricCard } from '../components/MetricCard'
@@ -24,7 +25,11 @@ export function ManagerDashboardPage() {
 
   return (
     <section className="manager page-stack">
-      <PageHeader title={dashboard.venueName} subtitle={`NightOut Partner - ${dashboard.managerName}`} />
+      <PageHeader
+        title={dashboard.venueName}
+        subtitle={`NightOut Partner - ${dashboard.managerName}`}
+        action={<Link className="small-action create-action" to="/manager/events/new">New</Link>}
+      />
 
       <article className="manager-event">
         <span>Serata selezionata</span>

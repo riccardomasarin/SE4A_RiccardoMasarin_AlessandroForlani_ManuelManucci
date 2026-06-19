@@ -5,6 +5,7 @@ import { AppShell } from './components/AppShell'
 import { DiscoveryFeedPage } from './pages/DiscoveryFeedPage'
 import { EventDetailPage } from './pages/EventDetailPage'
 import { ManagerDashboardPage } from './pages/ManagerDashboardPage'
+import { ManagerCreateEventPage } from './pages/ManagerCreateEventPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { NotificationsPage } from './pages/NotificationsPage'
 import { PregamePage } from './pages/PregamePage'
@@ -79,6 +80,7 @@ function App() {
             <Route path="/transport" element={user ? <TransportPage /> : <Navigate to="/role" replace />} />
             <Route path="/transport/:eventId" element={user ? <TransportPage /> : <Navigate to="/role" replace />} />
             <Route path="/manager" element={user ? <ManagerDashboardPage /> : <Navigate to="/role" replace />} />
+            <Route path="/manager/events/new" element={user ? <ManagerCreateEventPage /> : <Navigate to="/role" replace />} />
             <Route path="/notifications" element={user ? <NotificationsPage /> : <Navigate to="/role" replace />} />
             <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/role" replace />} />
             <Route path="*" element={<NotFoundPage />} />

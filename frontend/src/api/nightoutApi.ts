@@ -55,6 +55,22 @@ export interface EventFilterParams {
   sort?: string
 }
 
+export interface CreateEventRequest {
+  title: string
+  description: string
+  venueId: number
+  managerId: number
+  startsAt: string
+  musicGenre: MusicGenre
+  dressCode: string
+  ageRestriction: string
+  entryCondition: string
+  price: number
+  vipPrice: number
+  capacity: number
+  imageUrl: string
+}
+
 export const nightoutApi = {
   async getSession(role: UserRole): Promise<UserDto> {
     const response = await client.get<UserDto>('/demo/session', { params: { role } })
@@ -127,8 +143,20 @@ export const nightoutApi = {
     return response.data
   },
 
-  async getDashboard(): Promise<ManagerDashboardDto> {
-    const response = await client.get<ManagerDashboardDto>('/manager/dashboard')
+  async getDashboard(managerId?: number): Promise<ManagerDashboardDto> {
+    const response = await client.get<ManagerDashboardDto>('/manager/dashboard', {
+      params: managerId ? { managerId } : undefined,
+    })
+    return response.data
+  },
+
+  async getManagerVenues(managerId: number): Promise<VenueDto[]> {
+    const response = await client.get<VenueDto[]>('/manager/venues', { params: { managerId } })
+    return response.data
+  },
+
+  async createManagerEvent(request: CreateEventRequest): Promise<EventDetailDto> {
+    const response = await client.post<EventDetailDto>('/manager/events', request)
     return response.data
   },
 
