@@ -11,6 +11,12 @@ export type MusicGenre =
   | 'ROCK'
   | 'LIVE_MUSIC'
 
+export type VenueCategory =
+  | 'CLUB'
+  | 'BAR'
+  | 'LOUNGE'
+  | 'LIVE_MUSIC_VENUE'
+
 export type TicketStatus =
   | 'PENDING'
   | 'CONFIRMED'
@@ -159,6 +165,13 @@ export interface ProfileDto {
   savedEvents: EventSummaryDto[]
   tickets: TicketDto[]
   notifications: NotificationDto[]
+}
+
+export interface SavedEventDto {
+  userId: number
+  eventId: number
+  saved: boolean
+  event: EventSummaryDto
 }
 
 export interface SalesChannelDto {

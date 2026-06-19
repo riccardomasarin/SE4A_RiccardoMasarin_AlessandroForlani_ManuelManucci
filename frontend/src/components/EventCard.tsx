@@ -6,11 +6,13 @@ import { imageForId } from './images'
 interface EventCardProps {
   event: EventSummaryDto
   compact?: boolean
+  saved?: boolean
 }
 
-export function EventCard({ event, compact = false }: EventCardProps) {
+export function EventCard({ event, compact = false, saved = false }: EventCardProps) {
   return (
     <Link className={compact ? 'event-card compact' : 'event-card'} to={`/events/${event.id}`}>
+      {saved && <span className="saved-badge">Saved</span>}
       <img src={imageForId(event.id)} alt="" />
       <div className="event-card-body">
         <div>

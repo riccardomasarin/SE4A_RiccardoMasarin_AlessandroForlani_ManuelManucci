@@ -248,6 +248,68 @@
   background: var(--surface);
 }
 
+.filter-panel {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.filter-panel label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.filter-panel input,
+.filter-panel select {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.filter-panel .secondary-action {
+  grid-column: 1 / -1;
+}
+
+.empty-results {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  padding: 18px;
+  border: 1px solid rgba(245, 184, 75, 0.35);
+  border-radius: var(--radius);
+  background: rgba(245, 184, 75, 0.1);
+}
+
+.empty-results strong {
+  font-size: 18px;
+}
+
+.empty-results span {
+  color: var(--muted);
+}
+
+.empty-results button {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--radius);
+  color: white;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--violet), var(--blue));
+}
+
 .search-row button,
 .chip-row button,
 .action-grid button,
@@ -333,6 +395,20 @@
   scroll-snap-align: start;
 }
 
+.saved-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: white;
+  font-size: 12px;
+  font-weight: 900;
+  background: rgba(255, 79, 139, 0.88);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
+}
+
 .event-card.compact {
   min-height: 230px;
 }
@@ -401,6 +477,12 @@
   place-items: center;
   min-height: 56px;
   font-weight: 800;
+}
+
+.action-grid .saved {
+  border-color: rgba(255, 79, 139, 0.7);
+  color: white;
+  background: linear-gradient(135deg, var(--pink), var(--violet));
 }
 
 .info-grid {
@@ -516,6 +598,10 @@
 .ticket-row {
   display: grid;
   gap: 6px;
+}
+
+.saved-event-tile strong {
+  color: #ffffff;
 }
 
 .manager-event {
@@ -651,6 +737,79 @@
   border-radius: var(--radius);
   color: #ffc7d9;
   background: rgba(255, 79, 139, 0.12);
+}
+
+.inline-success,
+.inline-warning {
+  padding: 12px;
+  border: 1px solid rgba(64, 217, 130, 0.42);
+  border-radius: var(--radius);
+  color: #c7ffdf;
+  background: rgba(64, 217, 130, 0.12);
+}
+
+.inline-warning {
+  border-color: rgba(245, 184, 75, 0.45);
+  color: #ffe2a6;
+  background: rgba(245, 184, 75, 0.12);
+}
+
+.ticket-row.cancelled {
+  opacity: 0.72;
+}
+
+.ticket-row > a {
+  display: grid;
+  gap: 6px;
+}
+
+.ticket-row-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.ticket-row-footer button {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 79, 139, 0.45);
+  border-radius: var(--radius);
+  color: #ffc7d9;
+  font-weight: 800;
+  background: rgba(255, 79, 139, 0.12);
+  cursor: pointer;
+}
+
+.ticket-row-footer button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  color: white;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  background: var(--surface-3);
+}
+
+.status-pill.confirmed {
+  background: rgba(64, 217, 130, 0.28);
+}
+
+.status-pill.waiting-list {
+  background: rgba(245, 184, 75, 0.28);
+}
+
+.status-pill.cancelled {
+  background: rgba(255, 79, 139, 0.28);
 }
 
 @media (min-width: 760px) {

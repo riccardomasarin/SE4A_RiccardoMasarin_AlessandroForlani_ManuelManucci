@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import axios from 'axios'
 import { Link, useParams } from 'react-router-dom'
 import { formatCurrency, formatDateTime } from '../api/format'
 import { nightoutApi } from '../api/nightoutApi'
@@ -14,6 +15,7 @@ export function TicketPurchasePage() {
   const [ticketType, setTicketType] = useState('Standard')
   const [createdTicket, setCreatedTicket] = useState<TicketDto | null>(null)
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
 
   useEffect(() => {
     if (id) {
@@ -24,6 +26,7 @@ export function TicketPurchasePage() {
   async function buyTicket() {
     if (!user || !event) return
     setError('')
+    setNotice('')
     try {
       const ticket = await nightoutApi.requestTicket({
         userId: user.id,
@@ -32,8 +35,11 @@ export function TicketPurchasePage() {
         salesChannel: user.role === 'PR_MANAGER' ? user.name : 'NightOut App',
       })
       setCreatedTicket(ticket)
-    } catch {
-      setError('Ticket request rejected. You may already have an active ticket for this event.')
+      if (ticket.status === 'WAITING_LIST') {
+        setNotice('This event is currently full, so you have been added to the waiting list. We will confirm you automatically if a spot opens.')
+      }
+    } catch (requestError) {
+      setError(friendlyTicketError(requestError))
     }
   }
 
@@ -49,13 +55,18 @@ export function TicketPurchasePage() {
           <div className="ticket-band">
             <div>
               <h2>{createdTicket.ticketType}</h2>
-              <p>NightOut · Biglietto digitale</p>
+              <p>NightOut - Biglietto digitale</p>
             </div>
-            <span>{createdTicket.status}</span>
+            <span>{createdTicket.status === 'WAITING_LIST' ? 'WAITING LIST' : createdTicket.status}</span>
           </div>
           <div className="ticket-body">
             <h2>{createdTicket.eventTitle}</h2>
             <p>{createdTicket.venueAddress}</p>
+            {createdTicket.status === 'WAITING_LIST' && (
+              <p className="inline-warning">
+                This event is full. You are on the waiting list and will be promoted if a confirmed ticket is cancelled.
+              </p>
+            )}
             <div className="ticket-grid">
               <span>Data<strong>{formatDateTime(createdTicket.eventStartsAt)}</strong></span>
               <span>Accesso<strong>{createdTicket.ticketType}</strong></span>
@@ -75,7 +86,7 @@ export function TicketPurchasePage() {
       <h1>Ticket mock flow</h1>
       <article className="checkout-card">
         <h2>{event.title}</h2>
-        <p>{event.venue.name} · {formatDateTime(event.startsAt)}</p>
+        <p>{event.venue.name} - {formatDateTime(event.startsAt)}</p>
 
         <div className="ticket-options">
           <button
@@ -95,9 +106,29 @@ export function TicketPurchasePage() {
         </div>
 
         <p className="body-copy">No real payment is processed. The backend creates a simulated ticket or waiting-list entry.</p>
+        {event.availableSpots === 0 && (
+          <p className="inline-warning">This event is full. Confirming will place you on the waiting list.</p>
+        )}
+        {notice && <p className="inline-warning">{notice}</p>}
         {error && <p className="inline-error">{error}</p>}
         <button className="primary-action" type="button" onClick={buyTicket}>Confirm mock purchase</button>
       </article>
     </section>
   )
+}
+
+function friendlyTicketError(error: unknown) {
+  if (axios.isAxiosError<{ message?: string }>(error)) {
+    const message = error.response?.data?.message ?? ''
+    if (message.toLowerCase().includes('active ticket')) {
+      return 'You already have an active ticket or waiting-list spot for this event. Check My Tickets to view or cancel it.'
+    }
+    if (message.toLowerCase().includes('not found')) {
+      return 'We could not find this event or demo user. Refresh the page and try again.'
+    }
+    if (message) {
+      return message
+    }
+  }
+  return 'Ticket request could not be completed. Please try again.'
 }

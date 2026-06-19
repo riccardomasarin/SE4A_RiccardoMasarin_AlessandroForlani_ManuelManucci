@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { formatCurrency, formatDateTime, readableGenre } from '../api/format'
 import { nightoutApi } from '../api/nightoutApi'
 import { MetricCard } from '../components/MetricCard'
 import { PageHeader } from '../components/PageHeader'
@@ -39,8 +40,32 @@ export function ProfilePage() {
       <div className="manager-grid">
         <MetricCard label="Serate" value={profile.attendedNights} />
         <MetricCard label="Ticket" value={profile.activeTickets} />
+        <MetricCard label="Salvati" value={profile.savedEvents.length} />
         <MetricCard label="Punti" value={profile.user.points} />
       </div>
+
+      <section className="section-block">
+        <div className="section-heading">
+          <h2>Eventi salvati</h2>
+          <span>{profile.savedEvents.length} totali</span>
+        </div>
+        <div className="compact-list">
+          {profile.savedEvents.length === 0 ? (
+            <div className="list-tile">
+              <strong>Nessun evento salvato</strong>
+              <span>Salva una serata dalla pagina evento per ritrovarla qui.</span>
+            </div>
+          ) : (
+            profile.savedEvents.map((event) => (
+              <Link className="list-tile saved-event-tile" to={`/events/${event.id}`} key={event.id}>
+                <strong>{event.title}</strong>
+                <span>{event.venueName} - {formatDateTime(event.startsAt)}</span>
+                <span>{readableGenre(event.musicGenre)} - {event.price === 0 ? 'Free' : formatCurrency(event.price)}</span>
+              </Link>
+            ))
+          )}
+        </div>
+      </section>
 
       <section className="section-block">
         <h2>Biglietti e notifiche</h2>
