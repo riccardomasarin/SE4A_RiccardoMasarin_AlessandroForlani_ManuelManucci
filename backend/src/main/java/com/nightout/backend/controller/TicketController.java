@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,23 +22,44 @@ public class TicketController {
 
     private final TicketService ticketService;
 
-    public TicketController(TicketService ticketService) {
+    public TicketController(
+            TicketService ticketService
+    ) {
         this.ticketService = ticketService;
     }
 
     @GetMapping("/users/{userId}/tickets")
-    public List<TicketDto> getUserTickets(@PathVariable Long userId) {
-        return ticketService.getTicketsForUser(userId);
+    public List<TicketDto> getUserTickets(
+            @PathVariable Long userId
+    ) {
+        return ticketService
+                .getTicketsForUser(userId);
     }
 
     @PostMapping("/tickets")
     @ResponseStatus(HttpStatus.CREATED)
-    public TicketDto requestTicket(@Valid @RequestBody TicketRequestDto request) {
-        return ticketService.requestTicket(request);
+    public TicketDto requestTicket(
+            @Valid
+            @RequestBody
+            TicketRequestDto request
+    ) {
+        return ticketService
+                .requestTicket(request);
     }
 
     @DeleteMapping("/tickets/{ticketId}")
-    public TicketDto cancelTicket(@PathVariable Long ticketId) {
-        return ticketService.cancelTicket(ticketId);
+    public TicketDto cancelTicket(
+            @PathVariable Long ticketId
+    ) {
+        return ticketService
+                .cancelTicket(ticketId);
+    }
+
+    @GetMapping("/manager/tickets")
+    public List<TicketDto> getManagerTickets(
+            @RequestParam Long managerId
+    ) {
+        return ticketService
+                .getTicketsForManager(managerId);
     }
 }

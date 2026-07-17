@@ -13,7 +13,9 @@ import java.time.LocalDateTime;
 public class Ticket {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(
+            strategy = GenerationType.IDENTITY
+    )
     private Long id;
 
     private String code;
@@ -28,16 +30,40 @@ public class Ticket {
     private TicketStatus status;
 
     private String ticketType;
+
     private double pricePaid;
+
     private LocalDateTime createdAt;
+
     private String salesChannel;
+
     private String qrPayload;
+
+    @ManyToOne
+    private PrEventAssignment prAssignment;
+
+    private String promoCodeUsed;
+
+    private double discountAmount;
+
+    private double commissionAmount;
+
+    private LocalDateTime checkedInAt;
 
     public Ticket() {
     }
 
-    public Ticket(String code, AppUser user, Event event, TicketStatus status, String ticketType, double pricePaid,
-            LocalDateTime createdAt, String salesChannel, String qrPayload) {
+    public Ticket(
+            String code,
+            AppUser user,
+            Event event,
+            TicketStatus status,
+            String ticketType,
+            double pricePaid,
+            LocalDateTime createdAt,
+            String salesChannel,
+            String qrPayload
+    ) {
         this.code = code;
         this.user = user;
         this.event = event;
@@ -57,7 +83,9 @@ public class Ticket {
         return code;
     }
 
-    public void setCode(String code) {
+    public void setCode(
+            String code
+    ) {
         this.code = code;
     }
 
@@ -65,7 +93,9 @@ public class Ticket {
         return user;
     }
 
-    public void setUser(AppUser user) {
+    public void setUser(
+            AppUser user
+    ) {
         this.user = user;
     }
 
@@ -73,7 +103,9 @@ public class Ticket {
         return event;
     }
 
-    public void setEvent(Event event) {
+    public void setEvent(
+            Event event
+    ) {
         this.event = event;
     }
 
@@ -81,15 +113,31 @@ public class Ticket {
         return status;
     }
 
-    public void setStatus(TicketStatus status) {
-        this.status = status;
+    public void changeStatus(
+            TicketStatus newStatus
+    ) {
+        if (newStatus == null) {
+            throw new IllegalArgumentException(
+                    "Ticket status cannot be null."
+            );
+        }
+
+        this.status = newStatus;
+    }
+
+    public boolean isActive() {
+        return status == TicketStatus.PENDING
+                || status == TicketStatus.CONFIRMED
+                || status == TicketStatus.WAITING_LIST;
     }
 
     public String getTicketType() {
         return ticketType;
     }
 
-    public void setTicketType(String ticketType) {
+    public void setTicketType(
+            String ticketType
+    ) {
         this.ticketType = ticketType;
     }
 
@@ -97,7 +145,9 @@ public class Ticket {
         return pricePaid;
     }
 
-    public void setPricePaid(double pricePaid) {
+    public void setPricePaid(
+            double pricePaid
+    ) {
         this.pricePaid = pricePaid;
     }
 
@@ -105,7 +155,9 @@ public class Ticket {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(
+            LocalDateTime createdAt
+    ) {
         this.createdAt = createdAt;
     }
 
@@ -113,7 +165,9 @@ public class Ticket {
         return salesChannel;
     }
 
-    public void setSalesChannel(String salesChannel) {
+    public void setSalesChannel(
+            String salesChannel
+    ) {
         this.salesChannel = salesChannel;
     }
 
@@ -121,7 +175,60 @@ public class Ticket {
         return qrPayload;
     }
 
-    public void setQrPayload(String qrPayload) {
+    public void setQrPayload(
+            String qrPayload
+    ) {
         this.qrPayload = qrPayload;
+    }
+
+    public PrEventAssignment getPrAssignment() {
+        return prAssignment;
+    }
+
+    public void setPrAssignment(
+            PrEventAssignment prAssignment
+    ) {
+        this.prAssignment = prAssignment;
+    }
+
+    public String getPromoCodeUsed() {
+        return promoCodeUsed;
+    }
+
+    public void setPromoCodeUsed(
+            String promoCodeUsed
+    ) {
+        this.promoCodeUsed = promoCodeUsed;
+    }
+
+    public double getDiscountAmount() {
+        return discountAmount;
+    }
+
+    public void setDiscountAmount(
+            double discountAmount
+    ) {
+        this.discountAmount = discountAmount;
+    }
+
+    public double getCommissionAmount() {
+        return commissionAmount;
+    }
+
+    public void setCommissionAmount(
+            double commissionAmount
+    ) {
+        this.commissionAmount =
+                commissionAmount;
+    }
+
+    public LocalDateTime getCheckedInAt() {
+        return checkedInAt;
+    }
+
+    public void setCheckedInAt(
+            LocalDateTime checkedInAt
+    ) {
+        this.checkedInAt = checkedInAt;
     }
 }

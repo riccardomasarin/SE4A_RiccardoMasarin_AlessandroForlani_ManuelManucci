@@ -18,6 +18,13 @@ public record TicketDto(
         double pricePaid,
         LocalDateTime createdAt,
         String salesChannel,
-        String qrPayload
+        String qrPayload,
+        Long prId,
+        String prName,
+        String promoCodeUsed,
+        double discountAmount,
+        double commissionAmount,
+        LocalDateTime checkedInAt,
+        boolean checkedIn
 ) {
 }

@@ -17,6 +17,7 @@ public record EventSummaryDto(
         int capacity,
         long confirmedTickets,
         int availableSpots,
+        Double distanceKm,
         int popularityScore,
         boolean featured,
         String imageUrl,

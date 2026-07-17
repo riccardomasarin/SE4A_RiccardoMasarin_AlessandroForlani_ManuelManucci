@@ -6,6 +6,7 @@ public record TicketRequestDto(
         @NotNull Long userId,
         @NotNull Long eventId,
         String ticketType,
-        String salesChannel
+        String salesChannel,
+        String promoCode
 ) {
 }

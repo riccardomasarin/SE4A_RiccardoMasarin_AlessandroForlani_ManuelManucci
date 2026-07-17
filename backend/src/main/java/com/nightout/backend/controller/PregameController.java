@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 @RestController
 @RequestMapping("/api")
@@ -54,5 +55,13 @@ public class PregameController {
     @PostMapping("/pregames/{roomId}/leave")
     public PregameRoomDto leavePregame(@PathVariable Long roomId, @RequestParam Long userId) {
         return pregameService.leavePregame(roomId, userId);
+    }
+    @DeleteMapping("/pregames/{roomId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePregame(
+        @PathVariable Long roomId,
+        @RequestParam Long userId
+    ) {
+    pregameService.deletePregame(roomId, userId);
     }
 }

@@ -29,24 +29,67 @@ public class AppUser {
     private UserRole role;
 
     private String city;
+
+    private Double latitude;
+    private Double longitude;
+
     private boolean verified;
     private int points;
     private String avatarUrl;
 
-    @ElementCollection(targetClass = MusicGenre.class)
-    @CollectionTable(name = "user_music_preferences", joinColumns = @JoinColumn(name = "user_id"))
-    @Enumerated(EnumType.STRING)
+    private boolean privateProfile = false;
+    private boolean showCity = true;
+    private boolean showMusicPreferences = true;
+    private boolean allowPregameInvites = true;
+    private boolean allowFriendRequests = true;
+
+    @ElementCollection
+    @CollectionTable(
+            name = "user_music_preferences",
+            joinColumns = @JoinColumn(name = "user_id")
+    )
     @Column(name = "music_genre")
-    private Set<MusicGenre> musicPreferences = new LinkedHashSet<>();
+    private Set<String> musicPreferences =
+            new LinkedHashSet<>();
 
     public AppUser() {
     }
 
-    public AppUser(String name, String email, UserRole role, String city, boolean verified, int points, String avatarUrl) {
+    public AppUser(
+            String name,
+            String email,
+            UserRole role,
+            String city,
+            boolean verified,
+            int points,
+            String avatarUrl
+    ) {
         this.name = name;
         this.email = email;
         this.role = role;
         this.city = city;
+        this.verified = verified;
+        this.points = points;
+        this.avatarUrl = avatarUrl;
+    }
+
+    public AppUser(
+            String name,
+            String email,
+            UserRole role,
+            String city,
+            Double latitude,
+            Double longitude,
+            boolean verified,
+            int points,
+            String avatarUrl
+    ) {
+        this.name = name;
+        this.email = email;
+        this.role = role;
+        this.city = city;
+        this.latitude = latitude;
+        this.longitude = longitude;
         this.verified = verified;
         this.points = points;
         this.avatarUrl = avatarUrl;
@@ -60,7 +103,9 @@ public class AppUser {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(
+            String name
+    ) {
         this.name = name;
     }
 
@@ -68,7 +113,9 @@ public class AppUser {
         return email;
     }
 
-    public void setEmail(String email) {
+    public void setEmail(
+            String email
+    ) {
         this.email = email;
     }
 
@@ -76,7 +123,9 @@ public class AppUser {
         return role;
     }
 
-    public void setRole(UserRole role) {
+    public void setRole(
+            UserRole role
+    ) {
         this.role = role;
     }
 
@@ -84,15 +133,43 @@ public class AppUser {
         return city;
     }
 
-    public void setCity(String city) {
+    public void setCity(
+            String city
+    ) {
         this.city = city;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(
+            Double latitude
+    ) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(
+            Double longitude
+    ) {
+        this.longitude = longitude;
+    }
+
+    public boolean hasCoordinates() {
+        return latitude != null && longitude != null;
     }
 
     public boolean isVerified() {
         return verified;
     }
 
-    public void setVerified(boolean verified) {
+    public void setVerified(
+            boolean verified
+    ) {
         this.verified = verified;
     }
 
@@ -100,7 +177,9 @@ public class AppUser {
         return points;
     }
 
-    public void setPoints(int points) {
+    public void setPoints(
+            int points
+    ) {
         this.points = points;
     }
 
@@ -108,15 +187,77 @@ public class AppUser {
         return avatarUrl;
     }
 
-    public void setAvatarUrl(String avatarUrl) {
+    public void setAvatarUrl(
+            String avatarUrl
+    ) {
         this.avatarUrl = avatarUrl;
     }
 
-    public Set<MusicGenre> getMusicPreferences() {
+    public Set<String> getMusicPreferences() {
         return musicPreferences;
     }
 
-    public void setMusicPreferences(Set<MusicGenre> musicPreferences) {
-        this.musicPreferences = musicPreferences;
+    public void setMusicPreferences(
+            Set<String> musicPreferences
+    ) {
+        this.musicPreferences =
+                musicPreferences == null
+                        ? new LinkedHashSet<>()
+                        : new LinkedHashSet<>(
+                                musicPreferences
+                        );
+    }
+
+    public boolean isPrivateProfile() {
+        return privateProfile;
+    }
+
+    public void setPrivateProfile(
+            boolean privateProfile
+    ) {
+        this.privateProfile = privateProfile;
+    }
+
+    public boolean isShowCity() {
+        return showCity;
+    }
+
+    public void setShowCity(
+            boolean showCity
+    ) {
+        this.showCity = showCity;
+    }
+
+    public boolean isShowMusicPreferences() {
+        return showMusicPreferences;
+    }
+
+    public void setShowMusicPreferences(
+            boolean showMusicPreferences
+    ) {
+        this.showMusicPreferences =
+                showMusicPreferences;
+    }
+
+    public boolean isAllowPregameInvites() {
+        return allowPregameInvites;
+    }
+
+    public void setAllowPregameInvites(
+            boolean allowPregameInvites
+    ) {
+        this.allowPregameInvites =
+                allowPregameInvites;
+    }
+
+    public boolean isAllowFriendRequests() {
+        return allowFriendRequests;
+    }
+
+    public void setAllowFriendRequests(
+            boolean allowFriendRequests
+    ) {
+        this.allowFriendRequests =
+                allowFriendRequests;
     }
 }

@@ -19,6 +19,7 @@ public record EventDetailDto(
         int capacity,
         long confirmedTickets,
         int availableSpots,
+        Double distanceKm,
         int popularityScore,
         int atmosphereScore,
         int musicScore,

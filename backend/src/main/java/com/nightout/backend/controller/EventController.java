@@ -22,43 +22,118 @@ public class EventController {
 
     private final EventService eventService;
 
-    public EventController(EventService eventService) {
+    public EventController(
+            EventService eventService
+    ) {
         this.eventService = eventService;
     }
 
     @GetMapping("/events")
     public List<EventSummaryDto> getEvents(
-            @RequestParam(required = false) String city,
-            @RequestParam(required = false) String area,
-            @RequestParam(required = false) MusicGenre genre,
-            @RequestParam(required = false) VenueCategory venueCategory,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
-            @RequestParam(required = false) Double minPrice,
-            @RequestParam(required = false) Double maxPrice,
-            @RequestParam(required = false) String entryCondition,
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) Boolean featured,
-            @RequestParam(required = false, defaultValue = "date") String sort
+            @RequestParam(required = false)
+            String city,
+
+            @RequestParam(required = false)
+            String area,
+
+            @RequestParam(required = false)
+            MusicGenre genre,
+
+            @RequestParam(required = false)
+            VenueCategory venueCategory,
+
+            @RequestParam(required = false)
+            @DateTimeFormat(
+                    iso = DateTimeFormat.ISO.DATE
+            )
+            LocalDate date,
+
+            @RequestParam(required = false)
+            @DateTimeFormat(
+                    iso = DateTimeFormat.ISO.DATE
+            )
+            LocalDate fromDate,
+
+            @RequestParam(required = false)
+            @DateTimeFormat(
+                    iso = DateTimeFormat.ISO.DATE
+            )
+            LocalDate toDate,
+
+            @RequestParam(required = false)
+            Double minPrice,
+
+            @RequestParam(required = false)
+            Double maxPrice,
+
+            @RequestParam(required = false)
+            String entryCondition,
+
+            @RequestParam(required = false)
+            String search,
+
+            @RequestParam(required = false)
+            Boolean featured,
+
+            @RequestParam(
+                    required = false,
+                    defaultValue = "date"
+            )
+            String sort,
+
+            @RequestParam(required = false)
+            Long userId
     ) {
-        return eventService.findEvents(city, area, genre, venueCategory, date, fromDate, toDate, minPrice, maxPrice,
-                entryCondition, search, featured, sort);
+        return eventService.findEvents(
+                city,
+                area,
+                genre,
+                venueCategory,
+                date,
+                fromDate,
+                toDate,
+                minPrice,
+                maxPrice,
+                entryCondition,
+                search,
+                featured,
+                sort,
+                userId
+        );
     }
 
     @GetMapping("/events/popular")
-    public List<EventSummaryDto> getPopularEvents() {
-        return eventService.popularEvents();
+    public List<EventSummaryDto> getPopularEvents(
+            @RequestParam(required = false)
+            Long userId
+    ) {
+        return eventService.popularEvents(
+                userId
+        );
     }
 
     @GetMapping("/events/{eventId}")
-    public EventDetailDto getEvent(@PathVariable Long eventId) {
-        return eventService.getEvent(eventId);
+    public EventDetailDto getEvent(
+            @PathVariable
+            Long eventId,
+
+            @RequestParam(required = false)
+            Long userId
+    ) {
+        return eventService.getEvent(
+                eventId,
+                userId
+        );
     }
 
     @GetMapping("/events/{eventId}/return-transport")
-    public List<ReturnTransportDto> getReturnTransport(@PathVariable Long eventId) {
-        return eventService.findTransportForEvent(eventId);
+    public List<ReturnTransportDto> getReturnTransport(
+            @PathVariable
+            Long eventId
+    ) {
+        return eventService.findTransportForEvent(
+                eventId
+        );
     }
 
     @GetMapping("/partner-bars")

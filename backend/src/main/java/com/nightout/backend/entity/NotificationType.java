@@ -2,6 +2,8 @@ package com.nightout.backend.entity;
 
 public enum NotificationType {
     RESERVATION_UPDATE,
+    FRIEND_REQUEST,
+    FRIEND_REQUEST_ACCEPTED,
     FRIEND_JOINED_EVENT,
     WAITING_LIST_AVAILABLE,
     EVENT_UPDATE,
