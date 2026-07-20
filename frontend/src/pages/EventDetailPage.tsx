@@ -217,7 +217,7 @@ export function EventDetailPage() {
     <article className="event-detail page-stack">
       <img
         className="detail-hero"
-        src={imageForId(event.id)}
+        src={event.imageUrl || imageForId(event.id)}
         alt={`${event.title} event`}
       />
 

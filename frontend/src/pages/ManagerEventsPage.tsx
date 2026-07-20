@@ -727,9 +727,10 @@ export function ManagerEventsPage() {
                 >
                   <div className="manager-event-image">
                     <img
-                      src={imageForId(
-                        event.id,
-                      )}
+                      src={
+                        event.imageUrl
+                        || imageForId(event.id)
+                      }
                       alt={`${event.title} event`}
                     />
 

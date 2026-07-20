@@ -1,5 +1,6 @@
 package com.nightout.backend.data;
 
+import tools.jackson.databind.ObjectMapper;
 import com.nightout.backend.entity.AppUser;
 import com.nightout.backend.entity.Event;
 import com.nightout.backend.entity.EventParticipation;
@@ -31,12 +32,25 @@ import com.nightout.backend.repository.UserNotificationRepository;
 import com.nightout.backend.repository.VenueRepository;
 import com.nightout.backend.ticketstate.TicketStateFactory;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DemoDataLoader implements CommandLineRunner {
+
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(DemoDataLoader.class);
 
     private final AppUserRepository userRepository;
     private final VenueRepository venueRepository;
@@ -67,6 +81,8 @@ public class DemoDataLoader implements CommandLineRunner {
     private final ReturnTransportOptionRepository
             transportRepository;
 
+    private final ObjectMapper objectMapper;
+
     public DemoDataLoader(
             AppUserRepository userRepository,
             VenueRepository venueRepository,
@@ -79,7 +95,8 @@ public class DemoDataLoader implements CommandLineRunner {
             SocialRelationRepository socialRelationRepository,
             EventParticipationRepository participationRepository,
             SalesChannelRepository salesChannelRepository,
-            ReturnTransportOptionRepository transportRepository
+            ReturnTransportOptionRepository transportRepository,
+            ObjectMapper objectMapper
     ) {
         this.userRepository = userRepository;
         this.venueRepository = venueRepository;
@@ -101,6 +118,7 @@ public class DemoDataLoader implements CommandLineRunner {
                 salesChannelRepository;
         this.transportRepository =
                 transportRepository;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -114,220 +132,34 @@ public class DemoDataLoader implements CommandLineRunner {
         LocalDateTime now =
                 LocalDateTime.now();
 
-        AppUser marco = user(
-                "Marco Rossi",
-                "marco@nightout.demo",
-                UserRole.NORMAL_USER,
-                "Milano",
-                45.4840,
-                9.1890,
-                true,
-                1240,
-                "/demo/avatar-marco.jpg",
-                "Hip-Hop",
-                "R&B",
-                "House"
+        WorkbookSeedData workbookSeed =
+                WorkbookSeedData.load(objectMapper);
+
+        SeedContext seedContext =
+                createWorkbookSeedContext(workbookSeed);
+
+        userRepository.saveAll(seedContext.users());
+        venueRepository.saveAll(seedContext.venues());
+
+        AppUser marco = seedContext.user("U001");
+        AppUser sara = seedContext.user("U002");
+        AppUser luca = seedContext.user("U003");
+        AppUser gioia = seedContext.user("U004");
+        AppUser paolo = seedContext.user("U005");
+        AppUser prMarco = seedContext.pr("PR001");
+        AppUser manager = seedContext.manager(
+                "matteo.conti@nightout.demo"
         );
 
-        AppUser sara = user(
-                "Sara Bianchi",
-                "sara@nightout.demo",
-                UserRole.NORMAL_USER,
-                "Milano",
-                45.4642,
-                9.1900,
-                true,
-                870,
-                "/demo/avatar-sara.jpg",
-                "Pop",
-                "Latin"
-        );
-
-        AppUser luca = user(
-                "Luca Moretti",
-                "luca@nightout.demo",
-                UserRole.NORMAL_USER,
-                "Milano",
-                45.4510,
-                9.1770,
-                false,
-                560,
-                "/demo/avatar-luca.jpg",
-                "Techno",
-                "House"
-        );
-
-        AppUser gioia = user(
-                "Gioia T.",
-                "gioia@nightout.demo",
-                UserRole.NORMAL_USER,
-                "Milano",
-                45.4785,
-                9.2050,
-                true,
-                430,
-                "/demo/avatar-gioia.jpg",
-                "Commercial",
-                "Pop"
-        );
-
-        AppUser paolo = user(
-                "Paolo C.",
-                "paolo@nightout.demo",
-                UserRole.NORMAL_USER,
-                "Milano",
-                45.4930,
-                9.1850,
-                false,
-                320,
-                "/demo/avatar-paolo.jpg",
-                "Rock",
-                "Live music"
-        );
-
-        AppUser prMarco = user(
-                "PR Marco",
-                "prmarco@nightout.demo",
-                UserRole.PR_MANAGER,
-                "Milano",
-                45.4780,
-                9.1810,
-                true,
-                2100,
-                "/demo/avatar-pr-marco.jpg",
-                "Hip-Hop",
-                "Commercial"
-        );
-
-        AppUser manager = user(
-                "Lucia Venue",
-                "manager@nightout.demo",
-                UserRole.VENUE_MANAGER,
-                "Milano",
-                45.4720,
-                9.1880,
-                true,
-                0,
-                "/demo/avatar-manager.jpg",
-                "House",
-                "Techno"
-        );
-
-        userRepository.saveAll(
-                Set.of(
-                        marco,
-                        sara,
-                        luca,
-                        gioia,
-                        paolo,
-                        prMarco,
-                        manager
-                )
-        );
-
-        Venue crush = venue(
-                "Crush Club",
-                VenueCategory.CLUB,
-                "Corso Sempione 12",
-                "Milano",
-                "Sempione",
-                45.4807,
-                9.1669,
-                "Young club with neon lights, hip-hop and R&B nights.",
-                false,
-                4.6,
-                "/demo/crush.jpg",
-                manager
-        );
-
-        Venue fabric = venue(
-                "Fabric Milano",
-                VenueCategory.CLUB,
-                "Via Torino 12",
-                "Milano",
-                "Centro",
-                45.4623,
-                9.1874,
-                "Demo venue for techno and VIP ticket flows.",
-                false,
-                4.5,
-                "/demo/fabric.jpg",
-                manager
-        );
-
-        Venue volt = venue(
-                "Volt",
-                VenueCategory.CLUB,
-                "Via Molino delle Armi 16",
-                "Milano",
-                "Navigli",
-                45.4547,
-                9.1842,
-                "House night with a direct NightOut promotion.",
-                false,
-                4.4,
-                "/demo/volt.jpg",
-                manager
-        );
-
-        Venue pineta = venue(
-                "Pineta",
-                VenueCategory.CLUB,
-                "Viale Monte Grappa 18",
-                "Milano",
-                "Porta Nuova",
-                45.4840,
-                9.1877,
-                "Pop and commercial venue with group offers.",
-                false,
-                4.2,
-                "/demo/pineta.jpg",
-                manager
-        );
-
-        Venue botanist = venue(
-                "The Botanist Bar",
-                VenueCategory.BAR,
-                "Via Borsieri 12",
-                "Milano",
-                "Isola",
-                45.4886,
-                9.1874,
-                "Official partner bar for relaxed pre-serata meetups.",
-                true,
-                4.3,
-                "/demo/botanist.jpg",
-                manager
-        );
-
-        Venue nottingham = venue(
-                "Nottingham Forest",
-                VenueCategory.BAR,
-                "Viale Piave 1",
-                "Milano",
-                "Porta Venezia",
-                45.4706,
-                9.2054,
-                "Partner cocktail bar with pregame deals.",
-                true,
-                4.7,
-                "/demo/nottingham.jpg",
-                manager
-        );
-
-        venueRepository.saveAll(
-                Set.of(
-                        crush,
-                        fabric,
-                        volt,
-                        pineta,
-                        botanist,
-                        nottingham
-                )
-        );
+        Venue crush = seedContext.venue("V001");
+        Venue fabric = seedContext.venue("V002");
+        Venue volt = seedContext.venue("V003");
+        Venue pineta = seedContext.venue("V004");
+        Venue botanist = seedContext.venue("V005");
+        Venue nottingham = seedContext.venue("V006");
 
         Event crushFriday = event(
-                "Crush Friday",
+                "Urban Beats",
                 "Hip-hop and R&B night with smart casual dress code.",
                 crush,
                 now.plusDays(2)
@@ -342,8 +174,8 @@ public class DemoDataLoader implements CommandLineRunner {
                 260,
                 94,
                 true,
-                "/demo/crush-event.jpg",
-                manager,
+                "/images/events/after-exams-party.jpg",
+                crush.getManager(),
                 86,
                 90,
                 72,
@@ -351,7 +183,7 @@ public class DemoDataLoader implements CommandLineRunner {
         );
 
         Event fabricNight = event(
-                "Fabric Milano",
+                "Electronic Sessions",
                 "A demo VIP ticket night designed around the MyTicket mockup.",
                 fabric,
                 now.plusDays(2)
@@ -366,8 +198,8 @@ public class DemoDataLoader implements CommandLineRunner {
                 180,
                 88,
                 true,
-                "/demo/fabric-event.jpg",
-                manager,
+                "/images/events/covermln-1.jpg",
+                fabric.getManager(),
                 78,
                 84,
                 71,
@@ -375,7 +207,7 @@ public class DemoDataLoader implements CommandLineRunner {
         );
 
         Event voltHouse = event(
-                "Volt House",
+                "Midnight House",
                 "Blue lights, house music and fast-entry promo.",
                 volt,
                 now.plusDays(1)
@@ -390,8 +222,8 @@ public class DemoDataLoader implements CommandLineRunner {
                 140,
                 82,
                 true,
-                "/demo/volt-event.jpg",
-                manager,
+                "/images/events/disco-2000s-revival.jpg",
+                volt.getManager(),
                 74,
                 88,
                 69,
@@ -399,7 +231,7 @@ public class DemoDataLoader implements CommandLineRunner {
         );
 
         Event pinetaPop = event(
-                "Pineta Pop",
+                "Neon Pop",
                 "Commercial and pop night with group offers.",
                 pineta,
                 now.plusDays(3)
@@ -414,8 +246,8 @@ public class DemoDataLoader implements CommandLineRunner {
                 220,
                 76,
                 false,
-                "/demo/pineta-event.jpg",
-                manager,
+                "/images/events/international-students-night.jpg",
+                pineta.getManager(),
                 69,
                 73,
                 80,
@@ -423,7 +255,7 @@ public class DemoDataLoader implements CommandLineRunner {
         );
 
         Event fullHollywood = event(
-                "Hollywood Hip-Hop",
+                "Late Night Flow",
                 "Small-capacity demo event for waiting list behavior.",
                 crush,
                 now.plusDays(4)
@@ -438,8 +270,8 @@ public class DemoDataLoader implements CommandLineRunner {
                 2,
                 70,
                 false,
-                "/demo/hollywood-event.jpg",
-                manager,
+                "/images/events/navigli-house-session.jpg",
+                crush.getManager(),
                 68,
                 76,
                 66,
@@ -447,7 +279,7 @@ public class DemoDataLoader implements CommandLineRunner {
         );
 
         eventRepository.saveAll(
-                Set.of(
+                List.of(
                         crushFriday,
                         fabricNight,
                         voltHouse,
@@ -482,6 +314,18 @@ public class DemoDataLoader implements CommandLineRunner {
                 Set.of(
                         crushFridayPrMarco,
                         hollywoodPrMarco
+                )
+        );
+
+        importWorkbookAssignments(
+                workbookSeed,
+                seedContext,
+                List.of(
+                        crushFriday,
+                        fabricNight,
+                        voltHouse,
+                        pinetaPop,
+                        fullHollywood
                 )
         );
 
@@ -691,7 +535,7 @@ public class DemoDataLoader implements CommandLineRunner {
 
         PregameRoom preFabric =
                 new PregameRoom(
-                        "Pre-Fabric da Marco",
+                        "Pre-Electronic Sessions da Marco",
                         marco,
                         fabricNight,
                         "Via Borsieri 12",
@@ -699,7 +543,7 @@ public class DemoDataLoader implements CommandLineRunner {
                                 .getStartsAt()
                                 .minusHours(3),
                         8,
-                        "Relaxed pre-serata before Fabric. Ticket holders only.",
+                        "Relaxed pre-serata before Electronic Sessions. Ticket holders only.",
                         "/demo/pregame-marco.jpg",
                         false
                 );
@@ -725,7 +569,7 @@ public class DemoDataLoader implements CommandLineRunner {
                                 .getStartsAt()
                                 .minusHours(3),
                         6,
-                        "Casual aperitivo before Volt House.",
+                        "Casual aperitivo before Midnight House.",
                         "/demo/pregame-navigli.jpg",
                         false
                 );
@@ -823,7 +667,7 @@ public class DemoDataLoader implements CommandLineRunner {
                 new UserNotification(
                         marco,
                         NotificationType.RESERVATION_UPDATE,
-                        "Your VIP ticket for Fabric Milano is confirmed.",
+                        "Your VIP ticket for Electronic Sessions is confirmed.",
                         false,
                         now.minusMinutes(35)
                 )
@@ -833,7 +677,7 @@ public class DemoDataLoader implements CommandLineRunner {
                 new UserNotification(
                         marco,
                         NotificationType.FRIEND_JOINED_EVENT,
-                        "Sara joined Crush Friday.",
+                        "Sara joined Urban Beats.",
                         false,
                         now.minusMinutes(20)
                 )
@@ -843,7 +687,7 @@ public class DemoDataLoader implements CommandLineRunner {
                 new UserNotification(
                         paolo,
                         NotificationType.WAITING_LIST_AVAILABLE,
-                        "You are currently on the Hollywood Hip-Hop waiting list.",
+                        "You are currently on the Late Night Flow waiting list.",
                         false,
                         now.minusMinutes(10)
                 )
@@ -932,13 +776,607 @@ public class DemoDataLoader implements CommandLineRunner {
         );
     }
 
+    private SeedContext createWorkbookSeedContext(
+            WorkbookSeedData seedData
+    ) {
+        validateWorkbookSeedCounts(seedData);
+
+        Map<String, String> preservedUserAvatars =
+                Map.of(
+                        "U001", "/demo/avatar-marco.jpg",
+                        "U002", "/demo/avatar-sara.jpg",
+                        "U003", "/demo/avatar-luca.jpg",
+                        "U004", "/demo/avatar-gioia.jpg",
+                        "U005", "/demo/avatar-paolo.jpg",
+                        "PR001", "/demo/avatar-pr-marco.jpg"
+                );
+
+        Map<String, String> preservedVenueImages =
+                Map.of(
+                        "V001", "/demo/crush.jpg",
+                        "V002", "/demo/fabric.jpg",
+                        "V003", "/demo/volt.jpg",
+                        "V004", "/demo/pineta.jpg",
+                        "V005", "/demo/botanist.jpg",
+                        "V006", "/demo/nottingham.jpg"
+                );
+
+        List<AppUser> users = new ArrayList<>();
+        Map<String, AppUser> usersByWorkbookId =
+                new LinkedHashMap<>();
+        Map<String, AppUser> prsByWorkbookId =
+                new LinkedHashMap<>();
+        Map<String, AppUser> managersByEmail =
+                new LinkedHashMap<>();
+        Map<String, AppUser> usersByEmail =
+                new LinkedHashMap<>();
+
+        for (WorkbookSeedData.UserSeed seed : seedData.users()) {
+            if (seed.role() != UserRole.NORMAL_USER) {
+                throw new IllegalStateException(
+                        seed.workbookId()
+                                + " must use NORMAL_USER"
+                );
+            }
+
+            validateCoordinates(
+                    seed.workbookId(),
+                    seed.latitude(),
+                    seed.longitude()
+            );
+
+            AppUser appUser = user(
+                    seed.fullName(),
+                    seed.email(),
+                    seed.role(),
+                    seed.city(),
+                    seed.latitude(),
+                    seed.longitude(),
+                    seed.verified(),
+                    seed.points(),
+                    firstNonBlank(
+                            seed.avatarUrl(),
+                            preservedUserAvatars.get(
+                                    seed.workbookId()
+                            )
+                    ),
+                    seed.musicPreferences()
+                            .toArray(String[]::new)
+            );
+
+            registerProfile(
+                    seed.workbookId(),
+                    appUser,
+                    users,
+                    usersByWorkbookId,
+                    usersByEmail
+            );
+        }
+
+        for (WorkbookSeedData.PrSeed seed : seedData.prs()) {
+            if (seed.role() != UserRole.PR_MANAGER) {
+                throw new IllegalStateException(
+                        seed.workbookId()
+                                + " must use PR_MANAGER"
+                );
+            }
+
+            validateCoordinates(
+                    seed.workbookId(),
+                    seed.latitude(),
+                    seed.longitude()
+            );
+
+            AppUser appUser = user(
+                    seed.fullName(),
+                    seed.email(),
+                    seed.role(),
+                    seed.city(),
+                    seed.latitude(),
+                    seed.longitude(),
+                    seed.verified(),
+                    seed.points(),
+                    firstNonBlank(
+                            seed.avatarUrl(),
+                            preservedUserAvatars.get(
+                                    seed.workbookId()
+                            )
+                    ),
+                    seed.musicPreferences()
+                            .toArray(String[]::new)
+            );
+
+            registerProfile(
+                    seed.workbookId(),
+                    appUser,
+                    users,
+                    prsByWorkbookId,
+                    usersByEmail
+            );
+        }
+
+        Map<String, WorkbookSeedData.ManagerSeed>
+                managerSeedsByEmail = new LinkedHashMap<>();
+
+        for (WorkbookSeedData.VenueSeed venueSeed
+                : seedData.venues()) {
+            WorkbookSeedData.ManagerSeed managerSeed =
+                    venueSeed.manager();
+            String managerEmail =
+                    normalizeEmail(managerSeed.email());
+
+            WorkbookSeedData.ManagerSeed previousSeed =
+                    managerSeedsByEmail.putIfAbsent(
+                            managerEmail,
+                            managerSeed
+                    );
+
+            if (previousSeed != null) {
+                validateRepeatedManager(
+                        managerEmail,
+                        previousSeed,
+                        managerSeed
+                );
+                continue;
+            }
+
+            boolean preservedManager = managerEmail.equals(
+                    "matteo.conti@nightout.demo"
+            );
+
+            AppUser appUser = user(
+                    managerSeed.fullName(),
+                    managerSeed.email(),
+                    UserRole.VENUE_MANAGER,
+                    managerSeed.city(),
+                    preservedManager ? 45.4720 : null,
+                    preservedManager ? 9.1880 : null,
+                    managerSeed.verified(),
+                    0,
+                    firstNonBlank(
+                            managerSeed.avatarUrl(),
+                            preservedManager
+                                    ? "/demo/avatar-manager.jpg"
+                                    : null
+                    ),
+                    preservedManager
+                            ? new String[]{"House", "Techno"}
+                            : new String[0]
+            );
+
+            registerEmail(appUser, usersByEmail);
+            managersByEmail.put(managerEmail, appUser);
+            users.add(appUser);
+        }
+
+        if (managersByEmail.size() != 19) {
+            throw new IllegalStateException(
+                    "Expected 19 unique venue managers, found "
+                            + managersByEmail.size()
+            );
+        }
+
+        List<Venue> venues = new ArrayList<>();
+        Map<String, Venue> venuesByWorkbookId =
+                new LinkedHashMap<>();
+
+        for (WorkbookSeedData.VenueSeed seed
+                : seedData.venues()) {
+            validateCoordinates(
+                    seed.workbookId(),
+                    seed.latitude(),
+                    seed.longitude()
+            );
+
+            if (seed.rating() < 0 || seed.rating() > 5) {
+                throw new IllegalStateException(
+                        seed.workbookId()
+                                + " has rating outside 0-5"
+                );
+            }
+
+            AppUser venueManager = managersByEmail.get(
+                    normalizeEmail(seed.manager().email())
+            );
+
+            Venue venue = venue(
+                    seed.name(),
+                    seed.category(),
+                    seed.address(),
+                    seed.city(),
+                    seed.area(),
+                    seed.latitude(),
+                    seed.longitude(),
+                    seed.description(),
+                    seed.partnerBar(),
+                    seed.rating(),
+                    firstNonBlank(
+                            seed.imageUrl(),
+                            preservedVenueImages.get(
+                                    seed.workbookId()
+                            )
+                    ),
+                    venueManager
+            );
+
+            String venueId = normalizeId(seed.workbookId());
+            if (venuesByWorkbookId.putIfAbsent(
+                    venueId,
+                    venue
+            ) != null) {
+                throw new IllegalStateException(
+                        "Duplicate venue workbook ID: "
+                                + seed.workbookId()
+                );
+            }
+
+            venues.add(venue);
+        }
+
+        return new SeedContext(
+                List.copyOf(users),
+                List.copyOf(venues),
+                Map.copyOf(usersByWorkbookId),
+                Map.copyOf(prsByWorkbookId),
+                Map.copyOf(managersByEmail),
+                Map.copyOf(usersByEmail),
+                Map.copyOf(venuesByWorkbookId)
+        );
+    }
+
+    private void importWorkbookAssignments(
+            WorkbookSeedData seedData,
+            SeedContext seedContext,
+            List<Event> events
+    ) {
+        Set<String> assignmentIds = new HashSet<>();
+        Set<String> prEventKeys = new HashSet<>();
+        Set<String> eventPromoKeys = new HashSet<>();
+
+        for (PrEventAssignment assignment
+                : prAssignmentRepository.findAll()) {
+            prEventKeys.add(
+                    assignment.getPr().getId()
+                            + "|"
+                            + assignment.getEvent().getId()
+            );
+            eventPromoKeys.add(
+                    assignment.getEvent().getId()
+                            + "|"
+                            + normalizeText(
+                                    assignment.getPromoCode()
+                            )
+            );
+        }
+
+        List<PrEventAssignment> resolvedAssignments =
+                new ArrayList<>();
+        int unresolvedAssignments = 0;
+
+        for (WorkbookSeedData.AssignmentSeed seed
+                : seedData.assignments()) {
+            if (!assignmentIds.add(
+                    normalizeId(seed.assignmentId())
+            )) {
+                throw new IllegalStateException(
+                        "Duplicate assignment workbook ID: "
+                                + seed.assignmentId()
+                );
+            }
+
+            AppUser pr = seedContext.usersByEmail().get(
+                    normalizeEmail(seed.prEmail())
+            );
+            if (pr == null || pr.getRole() != UserRole.PR_MANAGER) {
+                throw new IllegalStateException(
+                        seed.assignmentId()
+                                + " references an invalid PR"
+                );
+            }
+
+            Venue venue = seedContext.venuesByWorkbookId().get(
+                    normalizeId(seed.venueId())
+            );
+            if (venue == null) {
+                throw new IllegalStateException(
+                        seed.assignmentId()
+                                + " references an invalid venue"
+                );
+            }
+
+            if (!normalizeText(venue.getName()).equals(
+                    normalizeText(seed.venueName())
+            )) {
+                throw new IllegalStateException(
+                        seed.assignmentId()
+                                + " has an inconsistent venue name"
+                );
+            }
+
+            Event event = resolveEvent(
+                    events,
+                    seed.eventReference(),
+                    venue
+            );
+            if (event == null) {
+                unresolvedAssignments++;
+                continue;
+            }
+
+            String prEventKey = pr.getId()
+                    + "|"
+                    + event.getId();
+            String eventPromoKey = event.getId()
+                    + "|"
+                    + normalizeText(seed.promoCode());
+
+            if (!prEventKeys.add(prEventKey)) {
+                throw new IllegalStateException(
+                        seed.assignmentId()
+                                + " duplicates a PR/event relationship"
+                );
+            }
+            if (!eventPromoKeys.add(eventPromoKey)) {
+                throw new IllegalStateException(
+                        seed.assignmentId()
+                                + " duplicates an event promo code"
+                );
+            }
+
+            resolvedAssignments.add(
+                    new PrEventAssignment(
+                            pr,
+                            event,
+                            seed.promoCode(),
+                            seed.discountPercentage(),
+                            seed.commissionPerTicket(),
+                            seed.active(),
+                            LocalDateTime.parse(seed.createdAt())
+                    )
+            );
+        }
+
+        if (!resolvedAssignments.isEmpty()) {
+            prAssignmentRepository.saveAll(resolvedAssignments);
+        }
+
+        LOGGER.info(
+                "Workbook seed loaded: {} users, {} venues, {} PRs, "
+                        + "{} resolved assignments, {} unresolved assignments",
+                seedData.users().size(),
+                seedData.venues().size(),
+                seedData.prs().size(),
+                resolvedAssignments.size(),
+                unresolvedAssignments
+        );
+    }
+
+    private Event resolveEvent(
+            List<Event> events,
+            String eventReference,
+            Venue venue
+    ) {
+        String normalizedReference =
+                normalizeText(eventReference);
+
+        List<Event> matches = events.stream()
+                .filter(event -> event.getVenue().getId()
+                        .equals(venue.getId()))
+                .filter(event -> {
+                    if (normalizedReference.matches("\\d+")) {
+                        return event.getId().equals(
+                                Long.valueOf(normalizedReference)
+                        );
+                    }
+                    return normalizeText(event.getTitle()).equals(
+                            normalizedReference
+                    );
+                })
+                .toList();
+
+        if (matches.size() > 1) {
+            throw new IllegalStateException(
+                    "Ambiguous event reference: "
+                            + eventReference
+                            + " at "
+                            + venue.getName()
+            );
+        }
+
+        return matches.isEmpty() ? null : matches.getFirst();
+    }
+
+    private void registerProfile(
+            String workbookId,
+            AppUser appUser,
+            List<AppUser> users,
+            Map<String, AppUser> profilesByWorkbookId,
+            Map<String, AppUser> usersByEmail
+    ) {
+        String normalizedId = normalizeId(workbookId);
+        if (profilesByWorkbookId.putIfAbsent(
+                normalizedId,
+                appUser
+        ) != null) {
+            throw new IllegalStateException(
+                    "Duplicate profile workbook ID: "
+                            + workbookId
+            );
+        }
+
+        registerEmail(appUser, usersByEmail);
+        users.add(appUser);
+    }
+
+    private void registerEmail(
+            AppUser appUser,
+            Map<String, AppUser> usersByEmail
+    ) {
+        String email = normalizeEmail(appUser.getEmail());
+        if (usersByEmail.putIfAbsent(email, appUser) != null) {
+            throw new IllegalStateException(
+                    "Duplicate profile email: "
+                            + appUser.getEmail()
+            );
+        }
+    }
+
+    private void validateRepeatedManager(
+            String email,
+            WorkbookSeedData.ManagerSeed first,
+            WorkbookSeedData.ManagerSeed repeated
+    ) {
+        if (!normalizeText(first.fullName()).equals(
+                normalizeText(repeated.fullName())
+        )
+                || !normalizeText(first.city()).equals(
+                        normalizeText(repeated.city())
+                )
+                || first.verified() != repeated.verified()
+                || !Objects.equals(
+                        first.avatarUrl(),
+                        repeated.avatarUrl()
+                )) {
+            throw new IllegalStateException(
+                    "Conflicting manager rows for " + email
+            );
+        }
+    }
+
+    private void validateWorkbookSeedCounts(
+            WorkbookSeedData seedData
+    ) {
+        if (seedData.users().size() != 20
+                || seedData.venues().size() != 30
+                || seedData.prs().size() != 10
+                || seedData.assignments().size() != 30) {
+            throw new IllegalStateException(
+                    "Workbook seed row counts do not match "
+                            + "20 users, 30 venues, 10 PRs, "
+                            + "and 30 assignments"
+            );
+        }
+    }
+
+    private void validateCoordinates(
+            String recordId,
+            Double latitude,
+            Double longitude
+    ) {
+        if (latitude == null
+                || longitude == null
+                || !Double.isFinite(latitude)
+                || !Double.isFinite(longitude)
+                || latitude < -90
+                || latitude > 90
+                || longitude < -180
+                || longitude > 180) {
+            throw new IllegalStateException(
+                    recordId + " has invalid coordinates"
+            );
+        }
+    }
+
+    private String normalizeEmail(String email) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalStateException(
+                    "Workbook email cannot be blank"
+            );
+        }
+        return email.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private String normalizeId(String id) {
+        if (id == null || id.isBlank()) {
+            throw new IllegalStateException(
+                    "Workbook ID cannot be blank"
+            );
+        }
+        return id.trim().toUpperCase(Locale.ROOT);
+    }
+
+    private String normalizeText(String text) {
+        if (text == null) {
+            return "";
+        }
+        return text.trim()
+                .replaceAll("\\s+", " ")
+                .toLowerCase(Locale.ROOT);
+    }
+
+    private String firstNonBlank(
+            String preferred,
+            String fallback
+    ) {
+        return preferred == null || preferred.isBlank()
+                ? fallback
+                : preferred;
+    }
+
+    private record SeedContext(
+            List<AppUser> users,
+            List<Venue> venues,
+            Map<String, AppUser> usersByWorkbookId,
+            Map<String, AppUser> prsByWorkbookId,
+            Map<String, AppUser> managersByEmail,
+            Map<String, AppUser> usersByEmail,
+            Map<String, Venue> venuesByWorkbookId
+    ) {
+
+        AppUser user(String workbookId) {
+            return required(
+                    usersByWorkbookId,
+                    workbookId,
+                    "user"
+            );
+        }
+
+        AppUser pr(String workbookId) {
+            return required(
+                    prsByWorkbookId,
+                    workbookId,
+                    "PR"
+            );
+        }
+
+        AppUser manager(String email) {
+            return required(
+                    managersByEmail,
+                    email.toLowerCase(Locale.ROOT),
+                    "venue manager"
+            );
+        }
+
+        Venue venue(String workbookId) {
+            return required(
+                    venuesByWorkbookId,
+                    workbookId.toUpperCase(Locale.ROOT),
+                    "venue"
+            );
+        }
+
+        private static <T> T required(
+                Map<String, T> values,
+                String key,
+                String label
+        ) {
+            T value = values.get(key);
+            if (value == null) {
+                throw new IllegalStateException(
+                        "Missing workbook " + label + ": " + key
+                );
+            }
+            return value;
+        }
+    }
+
     private AppUser user(
             String name,
             String email,
             UserRole role,
             String city,
-            double latitude,
-            double longitude,
+            Double latitude,
+            Double longitude,
             boolean verified,
             int points,
             String avatarUrl,
@@ -957,10 +1395,9 @@ public class DemoDataLoader implements CommandLineRunner {
                         avatarUrl
                 );
 
-        user.getMusicPreferences()
-                .addAll(
-                        Set.of(preferences)
-                );
+        user.setMusicPreferences(
+                new LinkedHashSet<>(List.of(preferences))
+        );
 
         return user;
     }
@@ -971,8 +1408,8 @@ public class DemoDataLoader implements CommandLineRunner {
             String address,
             String city,
             String area,
-            double latitude,
-            double longitude,
+            Double latitude,
+            Double longitude,
             String description,
             boolean partnerBar,
             double rating,

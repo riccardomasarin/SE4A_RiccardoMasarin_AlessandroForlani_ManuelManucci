@@ -462,7 +462,10 @@ export function ProfilePage() {
                 to={`/events/${event.id}`}
                 key={event.id}
               >
-                <img src={imageForId(event.id)} alt={`${event.title} event`} />
+                <img
+                  src={event.imageUrl || imageForId(event.id)}
+                  alt={`${event.title} event`}
+                />
 
                 <div className="saved-event-content">
                   <div>
