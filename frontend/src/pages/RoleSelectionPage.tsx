@@ -12,7 +12,7 @@ const roles: Array<{
   {
     role: 'NORMAL_USER',
     title: 'Normal user',
-    body: 'Browse events, reserve tickets, join pregames, and check Syncride returns.',
+    body: 'Browse events, reserve tickets, join pregames.',
     target: '/feed',
   },
   {
@@ -49,7 +49,6 @@ export function RoleSelectionPage() {
   return (
     <section className="role-screen">
       <div className="role-hero">
-        <span className="eyebrow">Software Engineering Demo</span>
         <h1>NightOUT</h1>
         <p>Choose a mock role to explore the nightlife app without real authentication.</p>
       </div>

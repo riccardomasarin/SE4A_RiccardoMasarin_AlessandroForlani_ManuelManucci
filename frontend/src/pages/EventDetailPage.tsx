@@ -264,10 +264,6 @@ export function EventDetailPage() {
           Share
         </button>
 
-        <Link to={`/transport/${event.id}`}>
-          Syncride
-        </Link>
-
         <a
           href={mapsUrl}
           target="_blank"

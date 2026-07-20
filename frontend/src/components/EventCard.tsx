@@ -15,6 +15,7 @@ interface EventCardProps {
   compact?: boolean
   saved?: boolean
   friendsAttending?: FriendUserDto[]
+  recommendationReason?: string
 }
 
 const BACKEND_URL = 'http://localhost:8080'
@@ -57,6 +58,7 @@ export function EventCard({
   compact = false,
   saved = false,
   friendsAttending = [],
+  recommendationReason,
 }: EventCardProps) {
   return (
     <Link
@@ -88,6 +90,16 @@ export function EventCard({
             </span>
           )}
         </div>
+
+        {recommendationReason && (
+          <div className="event-card-recommendation">
+            <span className="event-card-recommendation-badge">
+              Recommended
+            </span>
+
+            <strong>{recommendationReason}</strong>
+          </div>
+        )}
 
         {friendsAttending.length > 0 && (
           <div className="event-card-friends">

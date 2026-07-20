@@ -10,6 +10,7 @@ public record EventDetailDto(
         String description,
         VenueDto venue,
         LocalDateTime startsAt,
+        LocalDateTime endsAt,
         MusicGenre musicGenre,
         String dressCode,
         String ageRestriction,

@@ -34,10 +34,15 @@ import org.springframework.stereotype.Component;
 public class NightOutMapper {
 
     private final TicketRepository ticketRepository;
+
     private final PromotionRepository promotionRepository;
+
     private final PregameRoomRepository pregameRoomRepository;
+
     private final ReturnTransportOptionRepository transportRepository;
-    private final GeographicDistanceService geographicDistanceService;
+
+    private final GeographicDistanceService
+            geographicDistanceService;
 
     public NightOutMapper(
             TicketRepository ticketRepository,
@@ -46,10 +51,18 @@ public class NightOutMapper {
             ReturnTransportOptionRepository transportRepository,
             GeographicDistanceService geographicDistanceService
     ) {
-        this.ticketRepository = ticketRepository;
-        this.promotionRepository = promotionRepository;
-        this.pregameRoomRepository = pregameRoomRepository;
-        this.transportRepository = transportRepository;
+        this.ticketRepository =
+                ticketRepository;
+
+        this.promotionRepository =
+                promotionRepository;
+
+        this.pregameRoomRepository =
+                pregameRoomRepository;
+
+        this.transportRepository =
+                transportRepository;
+
         this.geographicDistanceService =
                 geographicDistanceService;
     }
@@ -101,8 +114,9 @@ public class NightOutMapper {
     }
 
     /*
-     * Versione mantenuta per i punti dell'applicazione
-     * nei quali non è disponibile un utente.
+     * Versione mantenuta per i punti
+     * dell'applicazione nei quali non
+     * è disponibile un utente.
      */
     public EventSummaryDto toEventSummaryDto(
             Event event
@@ -114,8 +128,9 @@ public class NightOutMapper {
     }
 
     /*
-     * Versione personalizzata che calcola la distanza
-     * tra l'utente e il locale dell'evento.
+     * Versione personalizzata che calcola
+     * la distanza tra l'utente e il locale
+     * dell'evento.
      */
     public EventSummaryDto toEventSummaryDto(
             Event event,
@@ -142,7 +157,9 @@ public class NightOutMapper {
                                 LocalDateTime.now()
                         )
                         .stream()
-                        .map(Promotion::getLabel)
+                        .map(
+                                Promotion::getLabel
+                        )
                         .toList();
 
         Double distanceKm =
@@ -159,6 +176,7 @@ public class NightOutMapper {
                 event.getVenue().getCity(),
                 event.getVenue().getArea(),
                 event.getStartsAt(),
+                event.getEndsAt(),
                 event.getMusicGenre(),
                 event.getEntryCondition(),
                 event.getPrice(),
@@ -174,8 +192,9 @@ public class NightOutMapper {
     }
 
     /*
-     * Versione mantenuta per le pagine amministrative
-     * che non richiedono una distanza personalizzata.
+     * Versione mantenuta per le pagine
+     * amministrative che non richiedono
+     * una distanza personalizzata.
      */
     public EventDetailDto toEventDetailDto(
             Event event
@@ -187,7 +206,8 @@ public class NightOutMapper {
     }
 
     /*
-     * Versione personalizzata del dettaglio evento.
+     * Versione personalizzata del dettaglio
+     * dell'evento.
      */
     public EventDetailDto toEventDetailDto(
             Event event,
@@ -214,7 +234,9 @@ public class NightOutMapper {
                                 LocalDateTime.now()
                         )
                         .stream()
-                        .map(this::toPromotionDto)
+                        .map(
+                                this::toPromotionDto
+                        )
                         .toList();
 
         List<PregameRoomDto> pregames =
@@ -228,7 +250,9 @@ public class NightOutMapper {
                                         PregameRoom::getMeetingTime
                                 )
                         )
-                        .map(this::toPregameRoomDto)
+                        .map(
+                                this::toPregameRoomDto
+                        )
                         .toList();
 
         List<ReturnTransportDto> transport =
@@ -237,7 +261,9 @@ public class NightOutMapper {
                                 event.getId()
                         )
                         .stream()
-                        .map(this::toReturnTransportDto)
+                        .map(
+                                this::toReturnTransportDto
+                        )
                         .toList();
 
         Double distanceKm =
@@ -251,8 +277,11 @@ public class NightOutMapper {
                 event.getId(),
                 event.getTitle(),
                 event.getDescription(),
-                toVenueDto(event.getVenue()),
+                toVenueDto(
+                        event.getVenue()
+                ),
                 event.getStartsAt(),
+                event.getEndsAt(),
                 event.getMusicGenre(),
                 event.getDressCode(),
                 event.getAgeRestriction(),
@@ -279,8 +308,11 @@ public class NightOutMapper {
     public TicketDto toTicketDto(
             Ticket ticket
     ) {
-        Event event = ticket.getEvent();
-        Venue venue = event.getVenue();
+        Event event =
+                ticket.getEvent();
+
+        Venue venue =
+                event.getVenue();
 
         PrEventAssignment prAssignment =
                 ticket.getPrAssignment();
@@ -325,7 +357,9 @@ public class NightOutMapper {
         List<UserDto> participants =
                 room.getParticipants()
                         .stream()
-                        .map(this::toUserDto)
+                        .map(
+                                this::toUserDto
+                        )
                         .toList();
 
         return new PregameRoomDto(
@@ -349,8 +383,11 @@ public class NightOutMapper {
     public PromotionDto toPromotionDto(
             Promotion promotion
     ) {
-        Event event = promotion.getEvent();
-        Venue venue = promotion.getVenue();
+        Event event =
+                promotion.getEvent();
+
+        Venue venue =
+                promotion.getVenue();
 
         return new PromotionDto(
                 promotion.getId(),

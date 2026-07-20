@@ -9,6 +9,7 @@ import type {
   EventSummaryDto,
   FriendUserDto,
   MusicGenre,
+  RecommendedEventDto,
   VenueCategory,
 } from '../types/nightout'
 
@@ -75,6 +76,16 @@ export function DiscoveryFeedPage() {
   const { user } = useSession()
 
   const [events, setEvents] = useState<EventSummaryDto[]>([])
+
+  const [recommendations, setRecommendations] = useState<
+    RecommendedEventDto[]
+  >([])
+
+  const [recommendationsLoading, setRecommendationsLoading] =
+    useState(false)
+
+  const [recommendationsError, setRecommendationsError] =
+    useState(false)
 
   const [savedIds, setSavedIds] = useState<Set<number>>(
     new Set(),
@@ -168,6 +179,43 @@ export function DiscoveryFeedPage() {
 
   useEffect(() => {
     if (!user) {
+      setRecommendations([])
+      setRecommendationsLoading(false)
+      setRecommendationsError(false)
+      return
+    }
+
+    let active = true
+
+    setRecommendationsLoading(true)
+    setRecommendationsError(false)
+
+    nightoutApi
+      .getRecommendations(user.id, 5)
+      .then((data) => {
+        if (active) {
+          setRecommendations(data)
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setRecommendations([])
+          setRecommendationsError(true)
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setRecommendationsLoading(false)
+        }
+      })
+
+    return () => {
+      active = false
+    }
+  }, [user])
+
+  useEffect(() => {
+    if (!user) {
       setSavedIds(new Set())
       return
     }
@@ -187,7 +235,13 @@ export function DiscoveryFeedPage() {
   }, [user])
 
   useEffect(() => {
-    if (!user || events.length === 0) {
+    if (
+      !user
+      || (
+        events.length === 0
+        && recommendations.length === 0
+      )
+    ) {
       setFriendsByEvent({})
       return
     }
@@ -196,9 +250,13 @@ export function DiscoveryFeedPage() {
 
     const loadFriendsAttending = async () => {
       const eventIds = Array.from(
-        new Set(
-          events.map((event) => event.id),
-        ),
+        new Set([
+          ...events.map((event) => event.id),
+          ...recommendations.map(
+            (recommendation) =>
+              recommendation.event.id,
+          ),
+        ]),
       )
 
       const results = await Promise.all(
@@ -245,7 +303,7 @@ export function DiscoveryFeedPage() {
     return () => {
       active = false
     }
-  }, [events, user])
+  }, [events, recommendations, user])
 
   const featured = useMemo(
     () =>
@@ -730,6 +788,74 @@ export function DiscoveryFeedPage() {
               Apply filters
             </button>
           </div>
+        </section>
+      )}
+
+      {user && (
+        <section className="section-block recommendation-feed-section">
+          <div className="section-heading">
+            <div>
+              <h2>Recommended for you</h2>
+
+              <p className="section-description">
+                Personalized using your music preferences,
+                activity, friends, distance and event popularity.
+              </p>
+            </div>
+
+            {!recommendationsLoading
+              && !recommendationsError
+              && recommendations.length > 0 && (
+                <span>
+                  {recommendations.length}{' '}
+                  {recommendations.length === 1
+                    ? 'pick'
+                    : 'picks'}
+                </span>
+              )}
+          </div>
+
+          {recommendationsLoading ? (
+            <div className="recommendation-feed-status">
+              Building your personalized recommendations...
+            </div>
+          ) : recommendationsError ? (
+            <p className="inline-error">
+              Personalized recommendations are temporarily
+              unavailable.
+            </p>
+          ) : recommendations.length === 0 ? (
+            <div className="recommendation-feed-empty">
+              <strong>No recommendations yet</strong>
+
+              <span>
+                Save events, select music preferences or book a
+                night to improve your suggestions.
+              </span>
+            </div>
+          ) : (
+            <div className="horizontal-list recommendation-list">
+              {recommendations.map((recommendation) => (
+                <EventCard
+                  compact
+                  event={recommendation.event}
+                  key={recommendation.event.id}
+                  saved={savedIds.has(
+                    recommendation.event.id,
+                  )}
+                  friendsAttending={
+                    friendsByEvent[
+                      recommendation.event.id
+                    ] ?? []
+                  }
+                  recommendationReason={
+                    recommendation.reasons[0]
+                    ?? `Recommendation score: ${recommendation.score}`
+                  }
+                />
+              ))}
+            </div>
+          )}
         </section>
       )}
 

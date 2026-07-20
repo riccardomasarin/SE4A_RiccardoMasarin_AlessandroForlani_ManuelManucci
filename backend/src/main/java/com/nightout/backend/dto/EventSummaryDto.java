@@ -11,6 +11,7 @@ public record EventSummaryDto(
         String city,
         String area,
         LocalDateTime startsAt,
+        LocalDateTime endsAt,
         MusicGenre musicGenre,
         String entryCondition,
         double price,

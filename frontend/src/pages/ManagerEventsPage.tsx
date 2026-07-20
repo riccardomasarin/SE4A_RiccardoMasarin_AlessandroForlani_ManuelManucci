@@ -1,4 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type FormEvent,
+} from 'react'
 import { Link } from 'react-router-dom'
 import {
   formatCurrency,
@@ -18,13 +23,17 @@ import type {
   MusicGenre,
 } from '../types/nightout'
 
-type EventFilter = 'all' | 'upcoming' | 'past'
+type EventFilter =
+  | 'all'
+  | 'active'
+  | 'past'
 
 type EditEventForm = {
   title: string
   description: string
   venueId: string
   startsAt: string
+  endsAt: string
   musicGenre: MusicGenre
   dressCode: string
   ageRestriction: string
@@ -35,15 +44,36 @@ type EditEventForm = {
   imageUrl: string
 }
 
+const genres: MusicGenre[] = [
+  'TECHNO',
+  'HOUSE',
+  'HIP_HOP',
+  'RNB',
+  'POP',
+  'COMMERCIAL',
+  'LATIN',
+  'ROCK',
+  'LIVE_MUSIC',
+]
+
 export function ManagerEventsPage() {
   const { user } = useSession()
 
-  const [events, setEvents] = useState<EventDetailDto[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [successMessage, setSuccessMessage] = useState('')
+  const [events, setEvents] =
+    useState<EventDetailDto[]>([])
 
-  const [search, setSearch] = useState('')
+  const [loading, setLoading] =
+    useState(true)
+
+  const [error, setError] =
+    useState('')
+
+  const [successMessage, setSuccessMessage] =
+    useState('')
+
+  const [search, setSearch] =
+    useState('')
+
   const [eventFilter, setEventFilter] =
     useState<EventFilter>('all')
 
@@ -53,91 +83,153 @@ export function ManagerEventsPage() {
   const [editForm, setEditForm] =
     useState<EditEventForm | null>(null)
 
-  const [saving, setSaving] = useState(false)
-  const [deletingEventId, setDeletingEventId] =
-    useState<number | null>(null)
+  const [saving, setSaving] =
+    useState(false)
 
-  function loadEvents() {
-    if (!user) return
+  const [
+    deletingEventId,
+    setDeletingEventId,
+  ] = useState<number | null>(null)
 
-    setLoading(true)
-    setError('')
+  useEffect(() => {
+    if (!user) {
+      setLoading(false)
+      return
+    }
 
-    nightoutApi
-      .getManagerEvents(user.id)
-      .then((data) => {
-        setEvents(data)
-      })
-      .catch(() => {
-        setError(
-          'Could not load the venue events. Check that the backend is running.',
+    let cancelled = false
+
+    async function loadEvents() {
+      if (!user) {
+        return
+      }
+
+      setLoading(true)
+      setError('')
+
+      try {
+        const data =
+          await nightoutApi.getManagerEvents(
+            user.id,
+          )
+
+        if (!cancelled) {
+          setEvents(data)
+        }
+      } catch {
+        if (!cancelled) {
+          setError(
+            'Could not load the venue events. Check that the backend is running.',
+          )
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false)
+        }
+      }
+    }
+
+    void loadEvents()
+
+    return () => {
+      cancelled = true
+    }
+  }, [user])
+
+  const filteredEvents =
+    useMemo(() => {
+      const normalizedSearch =
+        search.trim().toLowerCase()
+
+      const now = Date.now()
+
+      return events
+        .filter((event) => {
+          const eventEndTime =
+            getEventEndTime(event)
+
+          const matchesSearch =
+            !normalizedSearch
+            || event.title
+              .toLowerCase()
+              .includes(normalizedSearch)
+            || event.venue.name
+              .toLowerCase()
+              .includes(normalizedSearch)
+
+          /*
+           * Un evento è ancora attivo finché
+           * non viene raggiunto endsAt.
+           *
+           * Sono quindi considerati attivi sia
+           * gli eventi futuri sia quelli in corso.
+           */
+          const matchesStatus =
+            eventFilter === 'all'
+            || (
+              eventFilter === 'active'
+              && eventEndTime >= now
+            )
+            || (
+              eventFilter === 'past'
+              && eventEndTime < now
+            )
+
+          return (
+            matchesSearch
+            && matchesStatus
+          )
+        })
+        .sort(
+          (
+            firstEvent,
+            secondEvent,
+          ) =>
+            new Date(
+              firstEvent.startsAt,
+            ).getTime()
+            - new Date(
+              secondEvent.startsAt,
+            ).getTime(),
         )
-      })
-      .finally(() => {
-        setLoading(false)
-      })
-  }
+    }, [
+      events,
+      search,
+      eventFilter,
+    ])
 
-  useEffect(loadEvents, [user])
+  const activeEvents =
+    useMemo(
+      () =>
+        events.filter(
+          (event) =>
+            getEventEndTime(event)
+            >= Date.now(),
+        ).length,
+      [events],
+    )
 
-  const filteredEvents = useMemo(() => {
-    const normalizedSearch =
-      search.trim().toLowerCase()
-
-    const now = new Date().getTime()
-
-    return events
-      .filter((event) => {
-        const eventTime =
-          new Date(event.startsAt).getTime()
-
-        const matchesSearch =
-          !normalizedSearch ||
-          event.title
-            .toLowerCase()
-            .includes(normalizedSearch) ||
-          event.venue.name
-            .toLowerCase()
-            .includes(normalizedSearch)
-
-        const matchesStatus =
-          eventFilter === 'all' ||
-          (eventFilter === 'upcoming' &&
-            eventTime >= now) ||
-          (eventFilter === 'past' &&
-            eventTime < now)
-
-        return matchesSearch && matchesStatus
-      })
-      .sort(
-        (firstEvent, secondEvent) =>
-          new Date(firstEvent.startsAt).getTime() -
-          new Date(secondEvent.startsAt).getTime(),
-      )
-  }, [events, search, eventFilter])
-
-  const activeEvents = useMemo(
-    () =>
-      events.filter(
-        (event) =>
-          new Date(event.startsAt).getTime() >=
-          Date.now(),
-      ).length,
-    [events],
-  )
-
-  function openEditModal(event: EventDetailDto) {
+  function openEditModal(
+    event: EventDetailDto,
+  ) {
     setEditingEvent(event)
 
     setEditForm({
       title: event.title,
       description: event.description,
       venueId: String(event.venue.id),
-      startsAt: toDateTimeLocal(event.startsAt),
+      startsAt: toDateTimeLocal(
+        event.startsAt,
+      ),
+      endsAt: toDateTimeLocal(
+        event.endsAt,
+      ),
       musicGenre: event.musicGenre,
       dressCode: event.dressCode,
-      ageRestriction: event.ageRestriction,
-      entryCondition: event.entryCondition,
+      ageRestriction:
+        event.ageRestriction,
+      entryCondition:
+        event.entryCondition,
       price: String(event.price),
       vipPrice: String(event.vipPrice),
       capacity: String(event.capacity),
@@ -149,7 +241,9 @@ export function ManagerEventsPage() {
   }
 
   function closeEditModal() {
-    if (saving) return
+    if (saving) {
+      return
+    }
 
     setEditingEvent(null)
     setEditForm(null)
@@ -169,27 +263,85 @@ export function ManagerEventsPage() {
     )
   }
 
+  function updateEditStartTime(
+    value: string,
+  ) {
+    setEditForm((current) => {
+      if (!current) {
+        return current
+      }
+
+      if (!value) {
+        return {
+          ...current,
+          startsAt: '',
+        }
+      }
+
+      const startDate =
+        new Date(value)
+
+      const currentEndDate =
+        new Date(current.endsAt)
+
+      const endIsInvalid =
+        !current.endsAt
+        || Number.isNaN(
+          currentEndDate.getTime(),
+        )
+        || currentEndDate.getTime()
+        <= startDate.getTime()
+
+      if (!endIsInvalid) {
+        return {
+          ...current,
+          startsAt: value,
+        }
+      }
+
+      /*
+       * Se il nuovo inizio supera la vecchia
+       * fine, propone una nuova fine sei ore
+       * dopo l'inizio.
+       */
+      startDate.setHours(
+        startDate.getHours() + 6,
+      )
+
+      return {
+        ...current,
+        startsAt: value,
+        endsAt:
+          toDateTimeLocalFromDate(
+            startDate,
+          ),
+      }
+    })
+  }
+
   async function saveEventChanges(
-    formEvent: React.FormEvent<HTMLFormElement>,
+    formEvent:
+      FormEvent<HTMLFormElement>,
   ) {
     formEvent.preventDefault()
 
     if (
-      !user ||
-      !editingEvent ||
-      !editForm ||
-      saving
+      !user
+      || !editingEvent
+      || !editForm
+      || saving
     ) {
       return
     }
 
     if (
-      !editForm.title.trim() ||
-      !editForm.description.trim() ||
-      !editForm.startsAt ||
-      !editForm.dressCode.trim() ||
-      !editForm.ageRestriction.trim() ||
-      !editForm.entryCondition.trim()
+      !editForm.title.trim()
+      || !editForm.description.trim()
+      || !editForm.startsAt
+      || !editForm.endsAt
+      || !editForm.dressCode.trim()
+      || !editForm.ageRestriction.trim()
+      || !editForm.entryCondition.trim()
     ) {
       setError(
         'Please complete all required fields.',
@@ -197,30 +349,49 @@ export function ManagerEventsPage() {
       return
     }
 
-    const request: UpdateEventRequest = {
-      title: editForm.title.trim(),
-      description: editForm.description.trim(),
-      venueId: Number(editForm.venueId),
-      managerId: user.id,
-      startsAt: new Date(
+    const startTime =
+      new Date(
         editForm.startsAt,
-      ).toISOString(),
-      musicGenre: editForm.musicGenre,
-      dressCode: editForm.dressCode.trim(),
-      ageRestriction:
-        editForm.ageRestriction.trim(),
-      entryCondition:
-        editForm.entryCondition.trim(),
-      price: Number(editForm.price),
-      vipPrice: Number(editForm.vipPrice),
-      capacity: Number(editForm.capacity),
-      imageUrl: editForm.imageUrl.trim(),
-    }
+      ).getTime()
+
+    const endTime =
+      new Date(
+        editForm.endsAt,
+      ).getTime()
 
     if (
-      request.price < 0 ||
-      request.vipPrice < 0 ||
-      request.capacity < 1
+      Number.isNaN(startTime)
+      || Number.isNaN(endTime)
+    ) {
+      setError(
+        'Enter valid start and end times.',
+      )
+      return
+    }
+
+    if (endTime <= startTime) {
+      setError(
+        'End date and time must be after the start.',
+      )
+      return
+    }
+
+    const price =
+      Number(editForm.price)
+
+    const vipPrice =
+      Number(editForm.vipPrice)
+
+    const capacity =
+      Number(editForm.capacity)
+
+    if (
+      Number.isNaN(price)
+      || Number.isNaN(vipPrice)
+      || Number.isNaN(capacity)
+      || price < 0
+      || vipPrice < 0
+      || capacity < 1
     ) {
       setError(
         'Prices cannot be negative and capacity must be at least 1.',
@@ -228,30 +399,90 @@ export function ManagerEventsPage() {
       return
     }
 
+    const request:
+      UpdateEventRequest = {
+        title:
+          editForm.title.trim(),
+
+        description:
+          editForm.description.trim(),
+
+        venueId:
+          Number(editForm.venueId),
+
+        managerId:
+          user.id,
+
+        /*
+         * datetime-local produce già un formato
+         * compatibile con LocalDateTime:
+         * YYYY-MM-DDTHH:mm
+         */
+        startsAt:
+          editForm.startsAt,
+
+        endsAt:
+          editForm.endsAt,
+
+        musicGenre:
+          editForm.musicGenre,
+
+        dressCode:
+          editForm.dressCode.trim(),
+
+        ageRestriction:
+          editForm
+            .ageRestriction
+            .trim(),
+
+        entryCondition:
+          editForm
+            .entryCondition
+            .trim(),
+
+        price,
+
+        vipPrice,
+
+        capacity,
+
+        imageUrl:
+          editForm.imageUrl.trim()
+          || '/demo/new-event.jpg',
+      }
+
     setSaving(true)
     setError('')
     setSuccessMessage('')
 
     try {
       const updated =
-        await nightoutApi.updateManagerEvent(
-          editingEvent.id,
-          request,
-        )
+        await nightoutApi
+          .updateManagerEvent(
+            editingEvent.id,
+            request,
+          )
 
-      setEvents((currentEvents) =>
-        currentEvents.map((event) =>
-          event.id === updated.id
-            ? updated
-            : event,
-        ),
+      setEvents(
+        (currentEvents) =>
+          currentEvents.map(
+            (event) =>
+              event.id === updated.id
+                ? updated
+                : event,
+          ),
       )
 
       setSuccessMessage(
         'Event updated successfully.',
       )
 
-      closeEditModal()
+      /*
+       * Non utilizziamo closeEditModal()
+       * perché saving è ancora true.
+       */
+      setEditingEvent(null)
+      setEditForm(null)
     } catch {
       setError(
         'Could not update the event. Check the entered information.',
@@ -264,29 +495,37 @@ export function ManagerEventsPage() {
   async function deleteEvent(
     event: EventDetailDto,
   ) {
-    if (!user) return
+    if (!user) {
+      return
+    }
 
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${event.title}"? This action cannot be undone.`,
-    )
+    const confirmed =
+      window.confirm(
+        `Are you sure you want to delete "${event.title}"? This action cannot be undone.`,
+      )
 
-    if (!confirmed) return
+    if (!confirmed) {
+      return
+    }
 
     setDeletingEventId(event.id)
     setError('')
     setSuccessMessage('')
 
     try {
-      await nightoutApi.deleteManagerEvent(
-        event.id,
-        user.id,
-      )
+      await nightoutApi
+        .deleteManagerEvent(
+          event.id,
+          user.id,
+        )
 
-      setEvents((currentEvents) =>
-        currentEvents.filter(
-          (currentEvent) =>
-            currentEvent.id !== event.id,
-        ),
+      setEvents(
+        (currentEvents) =>
+          currentEvents.filter(
+            (currentEvent) =>
+              currentEvent.id
+              !== event.id,
+          ),
       )
 
       setSuccessMessage(
@@ -349,18 +588,26 @@ export function ManagerEventsPage() {
       <section className="manager-events-summary">
         <div>
           <span>Total events</span>
-          <strong>{events.length}</strong>
+
+          <strong>
+            {events.length}
+          </strong>
         </div>
 
         <div>
           <span>Active events</span>
-          <strong>{activeEvents}</strong>
+
+          <strong>
+            {activeEvents}
+          </strong>
         </div>
 
         <div>
           <span>Past events</span>
+
           <strong>
-            {events.length - activeEvents}
+            {events.length
+              - activeEvents}
           </strong>
         </div>
       </section>
@@ -374,7 +621,9 @@ export function ManagerEventsPage() {
             placeholder="Search by event or venue..."
             value={search}
             onChange={(event) =>
-              setSearch(event.target.value)
+              setSearch(
+                event.target.value,
+              )
             }
           />
         </label>
@@ -387,23 +636,25 @@ export function ManagerEventsPage() {
                 : undefined
             }
             type="button"
-            onClick={() => setEventFilter('all')}
+            onClick={() =>
+              setEventFilter('all')
+            }
           >
             All
           </button>
 
           <button
             className={
-              eventFilter === 'upcoming'
+              eventFilter === 'active'
                 ? 'active'
                 : undefined
             }
             type="button"
             onClick={() =>
-              setEventFilter('upcoming')
+              setEventFilter('active')
             }
           >
-            Upcoming
+            Active
           </button>
 
           <button
@@ -413,7 +664,9 @@ export function ManagerEventsPage() {
                 : undefined
             }
             type="button"
-            onClick={() => setEventFilter('past')}
+            onClick={() =>
+              setEventFilter('past')
+            }
           >
             Past
           </button>
@@ -422,11 +675,13 @@ export function ManagerEventsPage() {
 
       {filteredEvents.length === 0 ? (
         <div className="manager-events-empty">
-          <strong>No events found</strong>
+          <strong>
+            No events found
+          </strong>
 
           <span>
-            Create a new event or change the
-            selected filters.
+            Create a new event or change
+            the selected filters.
           </span>
 
           <Link
@@ -438,140 +693,198 @@ export function ManagerEventsPage() {
         </div>
       ) : (
         <div className="manager-events-grid">
-          {filteredEvents.map((event) => {
-            const isPast =
-              new Date(
-                event.startsAt,
-              ).getTime() < Date.now()
+          {filteredEvents.map(
+            (event) => {
+              const now =
+                Date.now()
 
-            return (
-              <article
-                className="manager-event-card"
-                key={event.id}
-              >
-                <div className="manager-event-image">
-                  <img
-                    src={imageForId(event.id)}
-                    alt={`${event.title} event`}
-                  />
+              const startTime =
+                new Date(
+                  event.startsAt,
+                ).getTime()
 
-                  <span
-                    className={
-                      isPast
-                        ? 'manager-event-status past'
-                        : 'manager-event-status active'
-                    }
-                  >
-                    {isPast
-                      ? 'Past event'
-                      : 'Upcoming'}
-                  </span>
-                </div>
+              const endTime =
+                getEventEndTime(event)
 
-                <div className="manager-event-content">
-                  <div className="manager-event-heading">
-                    <div>
-                      <h2>{event.title}</h2>
+              const isPast =
+                endTime < now
 
-                      <p>
-                        {event.venue.name}
-                      </p>
-                    </div>
+              const isOngoing =
+                startTime <= now
+                && endTime >= now
 
-                    <span className="chip active">
-                      {readableGenre(
-                        event.musicGenre,
+              const statusLabel =
+                isPast
+                  ? 'Past event'
+                  : isOngoing
+                    ? 'Ongoing'
+                    : 'Upcoming'
+
+              return (
+                <article
+                  className="manager-event-card"
+                  key={event.id}
+                >
+                  <div className="manager-event-image">
+                    <img
+                      src={imageForId(
+                        event.id,
                       )}
+                      alt={`${event.title} event`}
+                    />
+
+                    <span
+                      className={
+                        isPast
+                          ? 'manager-event-status past'
+                          : 'manager-event-status active'
+                      }
+                    >
+                      {statusLabel}
                     </span>
                   </div>
 
-                  <div className="manager-event-details">
-                    <div>
-                      <span>Date and time</span>
-                      <strong>
-                        {formatDateTime(
-                          event.startsAt,
+                  <div className="manager-event-content">
+                    <div className="manager-event-heading">
+                      <div>
+                        <h2>
+                          {event.title}
+                        </h2>
+
+                        <p>
+                          {event.venue.name}
+                        </p>
+                      </div>
+
+                      <span className="chip active">
+                        {readableGenre(
+                          event.musicGenre,
                         )}
-                      </strong>
+                      </span>
                     </div>
 
-                    <div>
-                      <span>Standard price</span>
-                      <strong>
-                        {formatCurrency(
-                          event.price,
-                        )}
-                      </strong>
+                    <div className="manager-event-details">
+                      <div>
+                        <span>Starts</span>
+
+                        <strong>
+                          {formatDateTime(
+                            event.startsAt,
+                          )}
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>Ends</span>
+
+                        <strong>
+                          {formatDateTime(
+                            event.endsAt,
+                          )}
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>
+                          Standard price
+                        </span>
+
+                        <strong>
+                          {formatCurrency(
+                            event.price,
+                          )}
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>VIP price</span>
+
+                        <strong>
+                          {formatCurrency(
+                            event.vipPrice,
+                          )}
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>Capacity</span>
+
+                        <strong>
+                          {event.capacity}
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>
+                          Tickets confirmed
+                        </span>
+
+                        <strong>
+                          {
+                            event
+                              .confirmedTickets
+                          }
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>
+                          Available spots
+                        </span>
+
+                        <strong>
+                          {
+                            event
+                              .availableSpots
+                          }
+                        </strong>
+                      </div>
                     </div>
 
-                    <div>
-                      <span>VIP price</span>
-                      <strong>
-                        {formatCurrency(
-                          event.vipPrice,
-                        )}
-                      </strong>
-                    </div>
+                    <div className="manager-event-actions">
+                      <Link
+                        className="secondary-action"
+                        to={`/events/${event.id}`}
+                      >
+                        View
+                      </Link>
 
-                    <div>
-                      <span>Capacity</span>
-                      <strong>
-                        {event.capacity}
-                      </strong>
-                    </div>
+                      <button
+                        className="secondary-action"
+                        type="button"
+                        onClick={() =>
+                          openEditModal(
+                            event,
+                          )
+                        }
+                      >
+                        Edit
+                      </button>
 
-                    <div>
-                      <span>Tickets confirmed</span>
-                      <strong>
-                        {event.confirmedTickets}
-                      </strong>
-                    </div>
-
-                    <div>
-                      <span>Available spots</span>
-                      <strong>
-                        {event.availableSpots}
-                      </strong>
+                      <button
+                        className="danger-action"
+                        type="button"
+                        onClick={() =>
+                          deleteEvent(
+                            event,
+                          )
+                        }
+                        disabled={
+                          deletingEventId
+                          === event.id
+                        }
+                      >
+                        {deletingEventId
+                          === event.id
+                          ? 'Deleting...'
+                          : 'Delete'}
+                      </button>
                     </div>
                   </div>
-
-                  <div className="manager-event-actions">
-                    <Link
-                      className="secondary-action"
-                      to={`/events/${event.id}`}
-                    >
-                      View
-                    </Link>
-
-                    <button
-                      className="secondary-action"
-                      type="button"
-                      onClick={() =>
-                        openEditModal(event)
-                      }
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      className="danger-action"
-                      type="button"
-                      onClick={() =>
-                        deleteEvent(event)
-                      }
-                      disabled={
-                        deletingEventId === event.id
-                      }
-                    >
-                      {deletingEventId === event.id
-                        ? 'Deleting...'
-                        : 'Delete'}
-                    </button>
-                  </div>
-                </div>
-              </article>
-            )
-          })}
+                </article>
+              )
+            },
+          )}
         </div>
       )}
 
@@ -581,8 +894,8 @@ export function ManagerEventsPage() {
           role="presentation"
           onMouseDown={(event) => {
             if (
-              event.target ===
-              event.currentTarget
+              event.target
+              === event.currentTarget
             ) {
               closeEditModal()
             }
@@ -602,7 +915,8 @@ export function ManagerEventsPage() {
 
                 <p>
                   Update event information,
-                  prices and availability.
+                  times, prices and
+                  availability.
                 </p>
               </div>
 
@@ -618,10 +932,14 @@ export function ManagerEventsPage() {
 
             <form
               className="manager-event-edit-form"
-              onSubmit={saveEventChanges}
+              onSubmit={
+                saveEventChanges
+              }
             >
               <label className="manager-event-form-full">
-                <span>Event title *</span>
+                <span>
+                  Event title *
+                </span>
 
                 <input
                   type="text"
@@ -637,10 +955,14 @@ export function ManagerEventsPage() {
               </label>
 
               <label className="manager-event-form-full">
-                <span>Description *</span>
+                <span>
+                  Description *
+                </span>
 
                 <textarea
-                  value={editForm.description}
+                  value={
+                    editForm.description
+                  }
                   onChange={(event) =>
                     updateEditField(
                       'description',
@@ -653,14 +975,17 @@ export function ManagerEventsPage() {
               </label>
 
               <label>
-                <span>Date and time *</span>
+                <span>
+                  Start date and time *
+                </span>
 
                 <input
                   type="datetime-local"
-                  value={editForm.startsAt}
+                  value={
+                    editForm.startsAt
+                  }
                   onChange={(event) =>
-                    updateEditField(
-                      'startsAt',
+                    updateEditStartTime(
                       event.target.value,
                     )
                   }
@@ -669,32 +994,59 @@ export function ManagerEventsPage() {
               </label>
 
               <label>
-                <span>Music genre *</span>
+                <span>
+                  End date and time *
+                </span>
 
-                <select
-                  value={editForm.musicGenre}
+                <input
+                  type="datetime-local"
+                  value={
+                    editForm.endsAt
+                  }
+                  min={
+                    editForm.startsAt
+                    || undefined
+                  }
                   onChange={(event) =>
                     updateEditField(
-                      'musicGenre',
+                      'endsAt',
                       event.target.value,
                     )
                   }
+                  required
+                />
+              </label>
+
+              <label>
+                <span>
+                  Music genre *
+                </span>
+
+                <select
+                  value={
+                    editForm.musicGenre
+                  }
+                  onChange={(event) =>
+                    updateEditField(
+                      'musicGenre',
+                      event.target
+                        .value as MusicGenre,
+                    )
+                  }
                 >
-                  <option value="HIP_HOP">
-                    Hip-Hop
-                  </option>
-
-                  <option value="HOUSE">
-                    House
-                  </option>
-
-                  <option value="TECHNO">
-                    Techno
-                  </option>
-
-                  <option value="POP">
-                    Pop
-                  </option>
+                  {genres.map(
+                    (genre) => (
+                      <option
+                        value={genre}
+                        key={genre}
+                      >
+                        {genre.replaceAll(
+                          '_',
+                          '-',
+                        )}
+                      </option>
+                    ),
+                  )}
                 </select>
               </label>
 
@@ -703,7 +1055,9 @@ export function ManagerEventsPage() {
 
                 <input
                   type="text"
-                  value={editForm.dressCode}
+                  value={
+                    editForm.dressCode
+                  }
                   onChange={(event) =>
                     updateEditField(
                       'dressCode',
@@ -715,12 +1069,15 @@ export function ManagerEventsPage() {
               </label>
 
               <label>
-                <span>Age restriction *</span>
+                <span>
+                  Age restriction *
+                </span>
 
                 <input
                   type="text"
                   value={
-                    editForm.ageRestriction
+                    editForm
+                      .ageRestriction
                   }
                   onChange={(event) =>
                     updateEditField(
@@ -733,12 +1090,15 @@ export function ManagerEventsPage() {
               </label>
 
               <label className="manager-event-form-full">
-                <span>Entry conditions *</span>
+                <span>
+                  Entry conditions *
+                </span>
 
                 <input
                   type="text"
                   value={
-                    editForm.entryCondition
+                    editForm
+                      .entryCondition
                   }
                   onChange={(event) =>
                     updateEditField(
@@ -751,7 +1111,9 @@ export function ManagerEventsPage() {
               </label>
 
               <label>
-                <span>Standard price *</span>
+                <span>
+                  Standard price *
+                </span>
 
                 <input
                   type="number"
@@ -775,7 +1137,9 @@ export function ManagerEventsPage() {
                   type="number"
                   min="0"
                   step="0.01"
-                  value={editForm.vipPrice}
+                  value={
+                    editForm.vipPrice
+                  }
                   onChange={(event) =>
                     updateEditField(
                       'vipPrice',
@@ -792,7 +1156,9 @@ export function ManagerEventsPage() {
                 <input
                   type="number"
                   min="1"
-                  value={editForm.capacity}
+                  value={
+                    editForm.capacity
+                  }
                   onChange={(event) =>
                     updateEditField(
                       'capacity',
@@ -808,7 +1174,9 @@ export function ManagerEventsPage() {
 
                 <input
                   type="text"
-                  value={editForm.imageUrl}
+                  value={
+                    editForm.imageUrl
+                  }
                   onChange={(event) =>
                     updateEditField(
                       'imageUrl',
@@ -822,7 +1190,9 @@ export function ManagerEventsPage() {
                 <button
                   className="secondary-action"
                   type="button"
-                  onClick={closeEditModal}
+                  onClick={
+                    closeEditModal
+                  }
                   disabled={saving}
                 >
                   Cancel
@@ -846,25 +1216,67 @@ export function ManagerEventsPage() {
   )
 }
 
-function toDateTimeLocal(value: string) {
-  const date = new Date(value)
+function getEventEndTime(
+  event: EventDetailDto,
+) {
+  const parsedEndTime =
+    new Date(
+      event.endsAt,
+    ).getTime()
 
-  const year = date.getFullYear()
-  const month = String(
-    date.getMonth() + 1,
-  ).padStart(2, '0')
+  if (
+    !Number.isNaN(
+      parsedEndTime,
+    )
+  ) {
+    return parsedEndTime
+  }
 
-  const day = String(
-    date.getDate(),
-  ).padStart(2, '0')
+  /*
+   * Fallback per eventuali vecchi dati:
+   * se endsAt manca, considera sei ore.
+   */
+  return (
+    new Date(
+      event.startsAt,
+    ).getTime()
+    + 6 * 60 * 60 * 1000
+  )
+}
 
-  const hours = String(
-    date.getHours(),
-  ).padStart(2, '0')
+function toDateTimeLocal(
+  value: string,
+) {
+  return toDateTimeLocalFromDate(
+    new Date(value),
+  )
+}
 
-  const minutes = String(
-    date.getMinutes(),
-  ).padStart(2, '0')
+function toDateTimeLocalFromDate(
+  date: Date,
+) {
+  const year =
+    date.getFullYear()
+
+  const month =
+    String(
+      date.getMonth() + 1,
+    ).padStart(2, '0')
+
+  const day =
+    String(
+      date.getDate(),
+    ).padStart(2, '0')
+
+  const hours =
+    String(
+      date.getHours(),
+    ).padStart(2, '0')
+
+  const minutes =
+    String(
+      date.getMinutes(),
+    ).padStart(2, '0')
 
   return `${year}-${month}-${day}T${hours}:${minutes}`
 }

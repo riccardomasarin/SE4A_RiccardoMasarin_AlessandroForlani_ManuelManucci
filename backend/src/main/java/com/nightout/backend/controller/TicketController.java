@@ -36,6 +36,11 @@ public class TicketController {
                 .getTicketsForUser(userId);
     }
 
+    /*
+     * Crea una nuova prenotazione.
+     * Il ticket viene salvato inizialmente
+     * nello stato PENDING.
+     */
     @PostMapping("/tickets")
     @ResponseStatus(HttpStatus.CREATED)
     public TicketDto requestTicket(
@@ -47,6 +52,33 @@ public class TicketController {
                 .requestTicket(request);
     }
 
+    /*
+     * Conferma un ticket PENDING.
+     *
+     * Se c'è disponibilità:
+     * PENDING -> CONFIRMED
+     *
+     * Se l'evento è pieno:
+     * PENDING -> WAITING_LIST
+     *
+     * Se la deadline è scaduta:
+     * PENDING -> EXPIRED
+     */
+    @PostMapping("/tickets/{ticketId}/confirm")
+    public TicketDto confirmTicket(
+            @PathVariable Long ticketId
+    ) {
+        return ticketService
+                .confirmTicket(ticketId);
+    }
+
+    /*
+     * Cancella un ticket attivo.
+     *
+     * PENDING -> CANCELLED
+     * CONFIRMED -> CANCELLED
+     * WAITING_LIST -> CANCELLED
+     */
     @DeleteMapping("/tickets/{ticketId}")
     public TicketDto cancelTicket(
             @PathVariable Long ticketId

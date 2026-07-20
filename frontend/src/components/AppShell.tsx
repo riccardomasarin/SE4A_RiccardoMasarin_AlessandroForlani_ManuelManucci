@@ -27,7 +27,11 @@ export function AppShell({
   const showNav =
     location.pathname !== '/role'
 
-  const navigationColumns = isPr ? 3 : 5
+  const navigationColumns = isPr
+    ? 3
+    : isVenue
+      ? 5
+      : 4
 
   return (
     <div className="app-shell">
@@ -89,11 +93,6 @@ export function AppShell({
               <NavLink to="/pregames">
                 <b>P</b>
                 <span>Pregame</span>
-              </NavLink>
-
-              <NavLink to="/transport">
-                <b>S</b>
-                <span>Syncride</span>
               </NavLink>
 
               <NavLink to="/profile">

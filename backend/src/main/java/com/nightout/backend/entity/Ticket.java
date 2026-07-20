@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 @Entity
 public class Ticket {
 
+    private static final long CONFIRMATION_TIMEOUT_MINUTES = 15;
+
     @Id
     @GeneratedValue(
             strategy = GenerationType.IDENTITY
@@ -34,6 +36,12 @@ public class Ticket {
     private double pricePaid;
 
     private LocalDateTime createdAt;
+
+    /*
+     * Momento entro il quale un ticket PENDING
+     * deve essere confermato.
+     */
+    private LocalDateTime confirmationDeadline;
 
     private String salesChannel;
 
@@ -67,10 +75,28 @@ public class Ticket {
         this.code = code;
         this.user = user;
         this.event = event;
-        this.status = status;
+
+        /*
+         * Ogni nuovo ticket deve iniziare
+         * nello stato PENDING.
+         */
+        changeStatus(status);
+
         this.ticketType = ticketType;
         this.pricePaid = pricePaid;
-        this.createdAt = createdAt;
+
+        LocalDateTime ticketCreationTime =
+                createdAt != null
+                        ? createdAt
+                        : LocalDateTime.now();
+
+        this.createdAt = ticketCreationTime;
+
+        this.confirmationDeadline =
+                ticketCreationTime.plusMinutes(
+                        CONFIRMATION_TIMEOUT_MINUTES
+                );
+
         this.salesChannel = salesChannel;
         this.qrPayload = qrPayload;
     }
@@ -113,12 +139,78 @@ public class Ticket {
         return status;
     }
 
+    /*
+     * Gestisce le transizioni della macchina a stati
+     * del ciclo di vita del ticket.
+     */
     public void changeStatus(
             TicketStatus newStatus
     ) {
         if (newStatus == null) {
             throw new IllegalArgumentException(
                     "Ticket status cannot be null."
+            );
+        }
+
+        /*
+         * Stato iniziale del ticket.
+         */
+        if (this.status == null) {
+            if (newStatus != TicketStatus.PENDING) {
+                throw new IllegalStateException(
+                        "A new ticket must start as PENDING."
+                );
+            }
+
+            this.status = newStatus;
+            return;
+        }
+
+        boolean validTransition =
+                switch (this.status) {
+
+                    case PENDING ->
+                            newStatus
+                                    == TicketStatus.CONFIRMED
+                                    || newStatus
+                                    == TicketStatus.WAITING_LIST
+                                    || newStatus
+                                    == TicketStatus.EXPIRED
+                                    || newStatus
+                                    == TicketStatus.CANCELLED;
+
+                    case WAITING_LIST ->
+                            newStatus
+                                    == TicketStatus.CONFIRMED
+                                    || newStatus
+                                    == TicketStatus.EXPIRED
+                                    || newStatus
+                                    == TicketStatus.CANCELLED;
+
+                    case CONFIRMED ->
+                            newStatus
+                                    == TicketStatus.EXPIRED
+                                    || newStatus
+                                    == TicketStatus.CANCELLED;
+
+                    /*
+                     * EXPIRED e CANCELLED sono stati finali.
+                     */
+                    case EXPIRED, CANCELLED -> false;
+
+                    /*
+                     * Protezione nel caso TicketStatus
+                     * contenga altri valori.
+                     */
+                    default -> false;
+                };
+
+        if (!validTransition) {
+            throw new IllegalStateException(
+                    "Invalid ticket transition: "
+                            + this.status
+                            + " -> "
+                            + newStatus
             );
         }
 
@@ -129,6 +221,26 @@ public class Ticket {
         return status == TicketStatus.PENDING
                 || status == TicketStatus.CONFIRMED
                 || status == TicketStatus.WAITING_LIST;
+    }
+
+    /*
+     * Restituisce true quando il ticket è ancora
+     * PENDING e il tempo disponibile è terminato.
+     */
+    public boolean isConfirmationExpired(
+            LocalDateTime currentTime
+    ) {
+        if (currentTime == null) {
+            throw new IllegalArgumentException(
+                    "Current time cannot be null."
+            );
+        }
+
+        return status == TicketStatus.PENDING
+                && confirmationDeadline != null
+                && !confirmationDeadline.isAfter(
+                        currentTime
+                );
     }
 
     public String getTicketType() {
@@ -159,6 +271,17 @@ public class Ticket {
             LocalDateTime createdAt
     ) {
         this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getConfirmationDeadline() {
+        return confirmationDeadline;
+    }
+
+    public void setConfirmationDeadline(
+            LocalDateTime confirmationDeadline
+    ) {
+        this.confirmationDeadline =
+                confirmationDeadline;
     }
 
     public String getSalesChannel() {

@@ -180,6 +180,7 @@ export interface EventSummaryDto {
   city: string
   area: string
   startsAt: string
+  endsAt: string
   musicGenre: MusicGenre
   entryCondition: string
   price: number
@@ -193,12 +194,19 @@ export interface EventSummaryDto {
   promotionLabels: string[]
 }
 
+export interface RecommendedEventDto {
+  event: EventSummaryDto
+  score: number
+  reasons: string[]
+}
+
 export interface EventDetailDto {
   id: number
   title: string
   description: string
   venue: VenueDto
   startsAt: string
+  endsAt: string
   musicGenre: MusicGenre
   dressCode: string
   ageRestriction: string

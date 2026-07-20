@@ -9,6 +9,7 @@ import com.nightout.backend.repository.AppUserRepository;
 import com.nightout.backend.repository.EventRepository;
 import com.nightout.backend.repository.PrEventAssignmentRepository;
 import com.nightout.backend.repository.TicketRepository;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -117,6 +118,48 @@ public class TicketDataMediator {
                         TicketStatus.WAITING_LIST
                 );
     }
+
+    /*
+     * Recupera tutti i ticket ancora PENDING
+     * la cui deadline di conferma è già trascorsa.
+     */
+    public List<Ticket> findExpiredPendingTickets(
+        LocalDateTime currentTime
+) {
+    return ticketRepository
+            .findByStatusAndConfirmationDeadlineLessThanEqual(
+                    TicketStatus.PENDING,
+                    currentTime
+            );
+}
+
+/*
+ * Recupera i ticket in WAITING_LIST
+ * relativi a eventi già iniziati.
+ */
+public List<Ticket> findWaitingListTicketsForStartedEvents(
+        LocalDateTime currentTime
+) {
+    return ticketRepository
+            .findByStatusAndEvent_StartsAtLessThanEqual(
+                    TicketStatus.WAITING_LIST,
+                    currentTime
+            );
+}
+
+/*
+ * Recupera i ticket CONFIRMED
+ * relativi a eventi già terminati.
+ */
+public List<Ticket> findConfirmedTicketsForEndedEvents(
+        LocalDateTime currentTime
+) {
+    return ticketRepository
+            .findByStatusAndEvent_EndsAtLessThanEqual(
+                    TicketStatus.CONFIRMED,
+                    currentTime
+            );
+}
 
     public Optional<PrEventAssignment>
             findActivePrAssignment(

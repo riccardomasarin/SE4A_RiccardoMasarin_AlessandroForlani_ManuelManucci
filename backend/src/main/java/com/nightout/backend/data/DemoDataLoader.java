@@ -5,6 +5,7 @@ import com.nightout.backend.entity.Event;
 import com.nightout.backend.entity.EventParticipation;
 import com.nightout.backend.entity.MusicGenre;
 import com.nightout.backend.entity.NotificationType;
+import com.nightout.backend.entity.PrEventAssignment;
 import com.nightout.backend.entity.PregameRoom;
 import com.nightout.backend.entity.Promotion;
 import com.nightout.backend.entity.ReturnTransportOption;
@@ -16,10 +17,10 @@ import com.nightout.backend.entity.UserNotification;
 import com.nightout.backend.entity.UserRole;
 import com.nightout.backend.entity.Venue;
 import com.nightout.backend.entity.VenueCategory;
-import com.nightout.backend.entity.PrEventAssignment;
 import com.nightout.backend.repository.AppUserRepository;
 import com.nightout.backend.repository.EventParticipationRepository;
 import com.nightout.backend.repository.EventRepository;
+import com.nightout.backend.repository.PrEventAssignmentRepository;
 import com.nightout.backend.repository.PregameRoomRepository;
 import com.nightout.backend.repository.PromotionRepository;
 import com.nightout.backend.repository.ReturnTransportOptionRepository;
@@ -28,7 +29,7 @@ import com.nightout.backend.repository.SocialRelationRepository;
 import com.nightout.backend.repository.TicketRepository;
 import com.nightout.backend.repository.UserNotificationRepository;
 import com.nightout.backend.repository.VenueRepository;
-import com.nightout.backend.repository.PrEventAssignmentRepository;
+import com.nightout.backend.ticketstate.TicketStateFactory;
 import java.time.LocalDateTime;
 import java.util.Set;
 import org.springframework.boot.CommandLineRunner;
@@ -41,14 +42,30 @@ public class DemoDataLoader implements CommandLineRunner {
     private final VenueRepository venueRepository;
     private final EventRepository eventRepository;
     private final TicketRepository ticketRepository;
-    private final PrEventAssignmentRepository prAssignmentRepository;
-    private final PregameRoomRepository pregameRoomRepository;
-    private final PromotionRepository promotionRepository;
-    private final UserNotificationRepository notificationRepository;
-    private final SocialRelationRepository socialRelationRepository;
-    private final EventParticipationRepository participationRepository;
-    private final SalesChannelRepository salesChannelRepository;
-    private final ReturnTransportOptionRepository transportRepository;
+
+    private final PrEventAssignmentRepository
+            prAssignmentRepository;
+
+    private final PregameRoomRepository
+            pregameRoomRepository;
+
+    private final PromotionRepository
+            promotionRepository;
+
+    private final UserNotificationRepository
+            notificationRepository;
+
+    private final SocialRelationRepository
+            socialRelationRepository;
+
+    private final EventParticipationRepository
+            participationRepository;
+
+    private final SalesChannelRepository
+            salesChannelRepository;
+
+    private final ReturnTransportOptionRepository
+            transportRepository;
 
     public DemoDataLoader(
             AppUserRepository userRepository,
@@ -68,23 +85,34 @@ public class DemoDataLoader implements CommandLineRunner {
         this.venueRepository = venueRepository;
         this.eventRepository = eventRepository;
         this.ticketRepository = ticketRepository;
-        this.prAssignmentRepository = prAssignmentRepository;
-        this.pregameRoomRepository = pregameRoomRepository;
-        this.promotionRepository = promotionRepository;
-        this.notificationRepository = notificationRepository;
-        this.socialRelationRepository = socialRelationRepository;
-        this.participationRepository = participationRepository;
-        this.salesChannelRepository = salesChannelRepository;
-        this.transportRepository = transportRepository;
+        this.prAssignmentRepository =
+                prAssignmentRepository;
+        this.pregameRoomRepository =
+                pregameRoomRepository;
+        this.promotionRepository =
+                promotionRepository;
+        this.notificationRepository =
+                notificationRepository;
+        this.socialRelationRepository =
+                socialRelationRepository;
+        this.participationRepository =
+                participationRepository;
+        this.salesChannelRepository =
+                salesChannelRepository;
+        this.transportRepository =
+                transportRepository;
     }
 
     @Override
-    public void run(String... args) {
+    public void run(
+            String... args
+    ) {
         if (userRepository.count() > 0) {
             return;
         }
 
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now =
+                LocalDateTime.now();
 
         AppUser marco = user(
                 "Marco Rossi",
@@ -302,7 +330,9 @@ public class DemoDataLoader implements CommandLineRunner {
                 "Crush Friday",
                 "Hip-hop and R&B night with smart casual dress code.",
                 crush,
-                now.plusDays(2).withHour(23).withMinute(0),
+                now.plusDays(2)
+                        .withHour(23)
+                        .withMinute(0),
                 MusicGenre.HIP_HOP,
                 "Smart casual",
                 "18+",
@@ -324,7 +354,9 @@ public class DemoDataLoader implements CommandLineRunner {
                 "Fabric Milano",
                 "A demo VIP ticket night designed around the MyTicket mockup.",
                 fabric,
-                now.plusDays(2).withHour(23).withMinute(0),
+                now.plusDays(2)
+                        .withHour(23)
+                        .withMinute(0),
                 MusicGenre.TECHNO,
                 "Dark casual",
                 "18+",
@@ -346,7 +378,9 @@ public class DemoDataLoader implements CommandLineRunner {
                 "Volt House",
                 "Blue lights, house music and fast-entry promo.",
                 volt,
-                now.plusDays(1).withHour(22).withMinute(30),
+                now.plusDays(1)
+                        .withHour(22)
+                        .withMinute(30),
                 MusicGenre.HOUSE,
                 "Clubwear",
                 "18+",
@@ -368,7 +402,9 @@ public class DemoDataLoader implements CommandLineRunner {
                 "Pineta Pop",
                 "Commercial and pop night with group offers.",
                 pineta,
-                now.plusDays(3).withHour(22).withMinute(45),
+                now.plusDays(3)
+                        .withHour(22)
+                        .withMinute(45),
                 MusicGenre.POP,
                 "Elegant casual",
                 "18+",
@@ -390,7 +426,9 @@ public class DemoDataLoader implements CommandLineRunner {
                 "Hollywood Hip-Hop",
                 "Small-capacity demo event for waiting list behavior.",
                 crush,
-                now.plusDays(4).withHour(23).withMinute(30),
+                now.plusDays(4)
+                        .withHour(23)
+                        .withMinute(30),
                 MusicGenre.HIP_HOP,
                 "Urban",
                 "18+",
@@ -419,33 +457,33 @@ public class DemoDataLoader implements CommandLineRunner {
         );
 
         PrEventAssignment crushFridayPrMarco =
-        new PrEventAssignment(
-                prMarco,
-                crushFriday,
-                "MARCO10",
-                10.0,
-                2.50,
-                true,
-                now.minusDays(5)
-        );
+                new PrEventAssignment(
+                        prMarco,
+                        crushFriday,
+                        "MARCO10",
+                        10.0,
+                        2.50,
+                        true,
+                        now.minusDays(5)
+                );
 
-PrEventAssignment hollywoodPrMarco =
-        new PrEventAssignment(
-                prMarco,
-                fullHollywood,
-                "MARCO5",
-                5.0,
-                3.00,
-                true,
-                now.minusDays(3)
-        );
+        PrEventAssignment hollywoodPrMarco =
+                new PrEventAssignment(
+                        prMarco,
+                        fullHollywood,
+                        "MARCO5",
+                        5.0,
+                        3.00,
+                        true,
+                        now.minusDays(3)
+                );
 
-prAssignmentRepository.saveAll(
-        Set.of(
-                crushFridayPrMarco,
-                hollywoodPrMarco
-        )
-);
+        prAssignmentRepository.saveAll(
+                Set.of(
+                        crushFridayPrMarco,
+                        hollywoodPrMarco
+                )
+        );
 
         promotionRepository.save(
                 new Promotion(
@@ -491,12 +529,18 @@ prAssignmentRepository.saveAll(
                 )
         );
 
-        ticketRepository.save(
+        /*
+         * Tutti i ticket dimostrativi nascono PENDING.
+         * Successivamente vengono portati allo stato
+         * richiesto attraverso il pattern State.
+         */
+
+        Ticket marcoTicket =
                 new Ticket(
                         "#A1-4892",
                         marco,
                         fabricNight,
-                        TicketStatus.CONFIRMED,
+                        TicketStatus.PENDING,
                         "VIP",
                         25,
                         now.minusHours(2),
@@ -505,50 +549,62 @@ prAssignmentRepository.saveAll(
                                 + fabricNight.getId()
                                 + ":"
                                 + marco.getId()
-                )
-        );
+                );
 
-        Ticket saraPrTicket = new Ticket(
-        "#A1-1024",
-        sara,
-        crushFriday,
-        TicketStatus.CONFIRMED,
-        "Standard",
-        13.50,
-        now.minusHours(4),
-        "PR Code - MARCO10",
-        "NIGHTOUT:"
-                + crushFriday.getId()
-                + ":"
-                + sara.getId()
-);
-
-saraPrTicket.setPrAssignment(
-        crushFridayPrMarco
-);
-
-saraPrTicket.setPromoCodeUsed(
-        "MARCO10"
-);
-
-saraPrTicket.setDiscountAmount(
-        1.50
-);
-
-saraPrTicket.setCommissionAmount(
-        2.50
-);
-
-ticketRepository.save(
-        saraPrTicket
-);
+        TicketStateFactory
+                .from(marcoTicket.getStatus())
+                .confirm(marcoTicket);
 
         ticketRepository.save(
+                marcoTicket
+        );
+
+        Ticket saraPrTicket =
+                new Ticket(
+                        "#A1-1024",
+                        sara,
+                        crushFriday,
+                        TicketStatus.PENDING,
+                        "Standard",
+                        13.50,
+                        now.minusHours(4),
+                        "PR Code - MARCO10",
+                        "NIGHTOUT:"
+                                + crushFriday.getId()
+                                + ":"
+                                + sara.getId()
+                );
+
+        TicketStateFactory
+                .from(saraPrTicket.getStatus())
+                .confirm(saraPrTicket);
+
+        saraPrTicket.setPrAssignment(
+                crushFridayPrMarco
+        );
+
+        saraPrTicket.setPromoCodeUsed(
+                "MARCO10"
+        );
+
+        saraPrTicket.setDiscountAmount(
+                1.50
+        );
+
+        saraPrTicket.setCommissionAmount(
+                2.50
+        );
+
+        ticketRepository.save(
+                saraPrTicket
+        );
+
+        Ticket lucaTicket =
                 new Ticket(
                         "#A1-1088",
                         luca,
                         fullHollywood,
-                        TicketStatus.CONFIRMED,
+                        TicketStatus.PENDING,
                         "Standard",
                         25,
                         now.minusHours(5),
@@ -557,50 +613,62 @@ ticketRepository.save(
                                 + fullHollywood.getId()
                                 + ":"
                                 + luca.getId()
-                )
-        );
+                );
 
-        Ticket gioiaPrTicket = new Ticket(
-        "#A1-1099",
-        gioia,
-        fullHollywood,
-        TicketStatus.CONFIRMED,
-        "Standard",
-        23.75,
-        now.minusHours(5),
-        "PR Code - MARCO5",
-        "NIGHTOUT:"
-                + fullHollywood.getId()
-                + ":"
-                + gioia.getId()
-);
-
-gioiaPrTicket.setPrAssignment(
-        hollywoodPrMarco
-);
-
-gioiaPrTicket.setPromoCodeUsed(
-        "MARCO5"
-);
-
-gioiaPrTicket.setDiscountAmount(
-        1.25
-);
-
-gioiaPrTicket.setCommissionAmount(
-        3.00
-);
-
-ticketRepository.save(
-        gioiaPrTicket
-);
+        TicketStateFactory
+                .from(lucaTicket.getStatus())
+                .confirm(lucaTicket);
 
         ticketRepository.save(
+                lucaTicket
+        );
+
+        Ticket gioiaPrTicket =
+                new Ticket(
+                        "#A1-1099",
+                        gioia,
+                        fullHollywood,
+                        TicketStatus.PENDING,
+                        "Standard",
+                        23.75,
+                        now.minusHours(5),
+                        "PR Code - MARCO5",
+                        "NIGHTOUT:"
+                                + fullHollywood.getId()
+                                + ":"
+                                + gioia.getId()
+                );
+
+        TicketStateFactory
+                .from(gioiaPrTicket.getStatus())
+                .confirm(gioiaPrTicket);
+
+        gioiaPrTicket.setPrAssignment(
+                hollywoodPrMarco
+        );
+
+        gioiaPrTicket.setPromoCodeUsed(
+                "MARCO5"
+        );
+
+        gioiaPrTicket.setDiscountAmount(
+                1.25
+        );
+
+        gioiaPrTicket.setCommissionAmount(
+                3.00
+        );
+
+        ticketRepository.save(
+                gioiaPrTicket
+        );
+
+        Ticket paoloWaitingTicket =
                 new Ticket(
                         "#A1-1101",
                         paolo,
                         fullHollywood,
-                        TicketStatus.WAITING_LIST,
+                        TicketStatus.PENDING,
                         "Standard",
                         25,
                         now.minusHours(1),
@@ -609,70 +677,91 @@ ticketRepository.save(
                                 + fullHollywood.getId()
                                 + ":"
                                 + paolo.getId()
-                )
+                );
+
+        TicketStateFactory
+                .from(paoloWaitingTicket.getStatus())
+                .moveToWaitingList(
+                        paoloWaitingTicket
+                );
+
+        ticketRepository.save(
+                paoloWaitingTicket
         );
 
-        PregameRoom preFabric = new PregameRoom(
-                "Pre-Fabric da Marco",
-                marco,
-                fabricNight,
-                "Via Borsieri 12",
-                fabricNight.getStartsAt().minusHours(3),
-                8,
-                "Relaxed pre-serata before Fabric. Ticket holders only.",
-                "/demo/pregame-marco.jpg",
-                false
-        );
-
-        preFabric.getParticipants().addAll(
-                Set.of(
+        PregameRoom preFabric =
+                new PregameRoom(
+                        "Pre-Fabric da Marco",
                         marco,
+                        fabricNight,
+                        "Via Borsieri 12",
+                        fabricNight
+                                .getStartsAt()
+                                .minusHours(3),
+                        8,
+                        "Relaxed pre-serata before Fabric. Ticket holders only.",
+                        "/demo/pregame-marco.jpg",
+                        false
+                );
+
+        preFabric.getParticipants()
+                .addAll(
+                        Set.of(
+                                marco,
+                                sara,
+                                luca,
+                                gioia,
+                                paolo
+                        )
+                );
+
+        PregameRoom navigli =
+                new PregameRoom(
+                        "Aperitivo Navigli",
                         sara,
-                        luca,
-                        gioia,
-                        paolo
-                )
-        );
+                        voltHouse,
+                        "Navigli",
+                        voltHouse
+                                .getStartsAt()
+                                .minusHours(3),
+                        6,
+                        "Casual aperitivo before Volt House.",
+                        "/demo/pregame-navigli.jpg",
+                        false
+                );
 
-        PregameRoom navigli = new PregameRoom(
-                "Aperitivo Navigli",
-                sara,
-                voltHouse,
-                "Navigli",
-                voltHouse.getStartsAt().minusHours(3),
-                6,
-                "Casual aperitivo before Volt House.",
-                "/demo/pregame-navigli.jpg",
-                false
-        );
+        navigli.getParticipants()
+                .addAll(
+                        Set.of(
+                                sara,
+                                luca,
+                                gioia
+                        )
+                );
 
-        navigli.getParticipants().addAll(
-                Set.of(
-                        sara,
-                        luca,
-                        gioia
-                )
-        );
+        PregameRoom botanistRoom =
+                new PregameRoom(
+                        "The Botanist Bar",
+                        manager,
+                        fabricNight,
+                        "The Botanist Bar",
+                        fabricNight
+                                .getStartsAt()
+                                .minusHours(4),
+                        24,
+                        "Official partner bar with -20% pregame deal.",
+                        "/demo/botanist.jpg",
+                        true
+                );
 
-        PregameRoom botanistRoom = new PregameRoom(
-                "The Botanist Bar",
-                manager,
-                fabricNight,
-                "The Botanist Bar",
-                fabricNight.getStartsAt().minusHours(4),
-                24,
-                "Official partner bar with -20% pregame deal.",
-                "/demo/botanist.jpg",
-                true
-        );
-
-        botanistRoom.getParticipants().addAll(
-                Set.of(
-                        marco,
-                        sara,
-                        luca
-                )
-        );
+        botanistRoom.getParticipants()
+                .addAll(
+                        Set.of(
+                                marco,
+                                sara,
+                                luca
+                        )
+                );
 
         pregameRoomRepository.saveAll(
                 Set.of(
@@ -855,20 +944,23 @@ ticketRepository.save(
             String avatarUrl,
             String... preferences
     ) {
-        AppUser user = new AppUser(
-                name,
-                email,
-                role,
-                city,
-                latitude,
-                longitude,
-                verified,
-                points,
-                avatarUrl
-        );
+        AppUser user =
+                new AppUser(
+                        name,
+                        email,
+                        role,
+                        city,
+                        latitude,
+                        longitude,
+                        verified,
+                        points,
+                        avatarUrl
+                );
 
         user.getMusicPreferences()
-                .addAll(Set.of(preferences));
+                .addAll(
+                        Set.of(preferences)
+                );
 
         return user;
     }
@@ -924,23 +1016,24 @@ ticketRepository.save(
             int drinkScore,
             int lineScore
     ) {
-        Event event = new Event(
-                title,
-                description,
-                venue,
-                startsAt,
-                musicGenre,
-                dressCode,
-                ageRestriction,
-                entryCondition,
-                price,
-                vipPrice,
-                capacity,
-                popularityScore,
-                featured,
-                imageUrl,
-                manager
-        );
+        Event event =
+                new Event(
+                        title,
+                        description,
+                        venue,
+                        startsAt,
+                        musicGenre,
+                        dressCode,
+                        ageRestriction,
+                        entryCondition,
+                        price,
+                        vipPrice,
+                        capacity,
+                        popularityScore,
+                        featured,
+                        imageUrl,
+                        manager
+                );
 
         event.setAtmosphereScore(
                 atmosphereScore

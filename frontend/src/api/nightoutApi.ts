@@ -15,8 +15,8 @@ import type {
   PrivacySettingsDto,
   ProfileDto,
   PrDashboardDto,
+  RecommendedEventDto,
   PromotionDto,
-  ReturnTransportDto,
   SavedEventDto,
   SendFriendRequestDto,
   SupportRequestDto,
@@ -77,6 +77,7 @@ export interface CreateEventRequest {
   venueId: number
   managerId: number
   startsAt: string
+  endsAt: string
   musicGenre: MusicGenre
   dressCode: string
   ageRestriction: string
@@ -93,6 +94,7 @@ export interface UpdateEventRequest {
   venueId: number
   managerId: number
   startsAt: string
+  endsAt: string
   musicGenre: MusicGenre
   dressCode: string
   ageRestriction: string
@@ -122,9 +124,26 @@ export const nightoutApi = {
   async getEvents(
     params?: EventFilterParams,
   ): Promise<EventSummaryDto[]> {
-    const response = await client.get<EventSummaryDto[]>('/events', {
-      params,
-    })
+    const response = await client.get<EventSummaryDto[]>(
+      '/events',
+      {
+        params,
+      },
+    )
+
+    return response.data
+  },
+
+  async getRecommendations(
+    userId: number,
+    limit = 5,
+  ): Promise<RecommendedEventDto[]> {
+    const response = await client.get<RecommendedEventDto[]>(
+      `/recommendations/users/${userId}`,
+      {
+        params: { limit },
+      },
+    )
 
     return response.data
   },
@@ -146,7 +165,9 @@ export const nightoutApi = {
     return response.data
   },
 
-  async getTickets(userId: number): Promise<TicketDto[]> {
+  async getTickets(
+    userId: number,
+  ): Promise<TicketDto[]> {
     const response = await client.get<TicketDto[]>(
       `/users/${userId}/tickets`,
     )
@@ -154,37 +175,69 @@ export const nightoutApi = {
     return response.data
   },
 
-  async getManagerTickets(managerId: number): Promise<TicketDto[]> {
-    const response = await client.get<TicketDto[]>('/manager/tickets', {
-      params: { managerId },
-    })
+  async getManagerTickets(
+    managerId: number,
+  ): Promise<TicketDto[]> {
+    const response = await client.get<TicketDto[]>(
+      '/manager/tickets',
+      {
+        params: { managerId },
+      },
+    )
 
     return response.data
   },
 
-  async getPrDashboard(prId: number): Promise<PrDashboardDto> {
-    const response = await client.get<PrDashboardDto>('/pr/dashboard', {
-      params: { prId },
-    })
+  async getPrDashboard(
+    prId: number,
+  ): Promise<PrDashboardDto> {
+    const response = await client.get<PrDashboardDto>(
+      '/pr/dashboard',
+      {
+        params: { prId },
+      },
+    )
 
     return response.data
   },
 
-  async getPrTickets(prId: number): Promise<TicketDto[]> {
-    const response = await client.get<TicketDto[]>('/pr/tickets', {
-      params: { prId },
-    })
+  async getPrTickets(
+    prId: number,
+  ): Promise<TicketDto[]> {
+    const response = await client.get<TicketDto[]>(
+      '/pr/tickets',
+      {
+        params: { prId },
+      },
+    )
 
     return response.data
   },
 
-  async requestTicket(request: TicketRequest): Promise<TicketDto> {
-    const response = await client.post<TicketDto>('/tickets', request)
+  async requestTicket(
+    request: TicketRequest,
+  ): Promise<TicketDto> {
+    const response = await client.post<TicketDto>(
+      '/tickets',
+      request,
+    )
 
     return response.data
   },
 
-  async cancelTicket(ticketId: number): Promise<TicketDto> {
+  async confirmTicket(
+    ticketId: number,
+  ): Promise<TicketDto> {
+    const response = await client.post<TicketDto>(
+      `/tickets/${ticketId}/confirm`,
+    )
+
+    return response.data
+  },
+
+  async cancelTicket(
+    ticketId: number,
+  ): Promise<TicketDto> {
     const response = await client.delete<TicketDto>(
       `/tickets/${ticketId}`,
     )
@@ -192,15 +245,25 @@ export const nightoutApi = {
     return response.data
   },
 
-  async getPregames(eventId?: number): Promise<PregameRoomDto[]> {
-    const response = await client.get<PregameRoomDto[]>('/pregames', {
-      params: eventId ? { eventId } : undefined,
-    })
+  async getPregames(
+    eventId?: number,
+  ): Promise<PregameRoomDto[]> {
+    const response = await client.get<PregameRoomDto[]>(
+      '/pregames',
+      {
+        params:
+          eventId !== undefined
+            ? { eventId }
+            : undefined,
+      },
+    )
 
     return response.data
   },
 
-  async getPregame(roomId: number): Promise<PregameRoomDto> {
+  async getPregame(
+    roomId: number,
+  ): Promise<PregameRoomDto> {
     const response = await client.get<PregameRoomDto>(
       `/pregames/${roomId}`,
     )
@@ -258,16 +321,10 @@ export const nightoutApi = {
     })
   },
 
-  async getTransport(eventId: number): Promise<ReturnTransportDto[]> {
-    const response = await client.get<ReturnTransportDto[]>(
-      `/events/${eventId}/return-transport`,
-    )
-
-    return response.data
-  },
-
   async getPartnerBars(): Promise<VenueDto[]> {
-    const response = await client.get<VenueDto[]>('/partner-bars')
+    const response = await client.get<VenueDto[]>(
+      '/partner-bars',
+    )
 
     return response.data
   },
@@ -278,17 +335,25 @@ export const nightoutApi = {
     const response = await client.get<ManagerDashboardDto>(
       '/manager/dashboard',
       {
-        params: managerId ? { managerId } : undefined,
+        params:
+          managerId !== undefined
+            ? { managerId }
+            : undefined,
       },
     )
 
     return response.data
   },
 
-  async getManagerVenues(managerId: number): Promise<VenueDto[]> {
-    const response = await client.get<VenueDto[]>('/manager/venues', {
-      params: { managerId },
-    })
+  async getManagerVenues(
+    managerId: number,
+  ): Promise<VenueDto[]> {
+    const response = await client.get<VenueDto[]>(
+      '/manager/venues',
+      {
+        params: { managerId },
+      },
+    )
 
     return response.data
   },
@@ -345,9 +410,12 @@ export const nightoutApi = {
     eventId: number,
     managerId: number,
   ): Promise<void> {
-    await client.delete(`/manager/events/${eventId}`, {
-      params: { managerId },
-    })
+    await client.delete(
+      `/manager/events/${eventId}`,
+      {
+        params: { managerId },
+      },
+    )
   },
 
   async getManagerPromotions(
@@ -426,12 +494,17 @@ export const nightoutApi = {
     promotionId: number,
     managerId: number,
   ): Promise<void> {
-    await client.delete(`/promotions/${promotionId}`, {
-      params: { managerId },
-    })
+    await client.delete(
+      `/promotions/${promotionId}`,
+      {
+        params: { managerId },
+      },
+    )
   },
 
-  async getProfile(userId: number): Promise<ProfileDto> {
+  async getProfile(
+    userId: number,
+  ): Promise<ProfileDto> {
     const response = await client.get<ProfileDto>(
       `/users/${userId}/profile`,
     )
@@ -489,7 +562,9 @@ export const nightoutApi = {
     return response.data
   },
 
-  async removeAvatar(userId: number): Promise<UserDto> {
+  async removeAvatar(
+    userId: number,
+  ): Promise<UserDto> {
     const response = await client.delete<UserDto>(
       `/users/${userId}/avatar`,
     )
@@ -608,7 +683,9 @@ export const nightoutApi = {
     return response.data
   },
 
-  async getFriends(userId: number): Promise<FriendUserDto[]> {
+  async getFriends(
+    userId: number,
+  ): Promise<FriendUserDto[]> {
     const response = await client.get<FriendUserDto[]>(
       `/friendships/users/${userId}/friends`,
     )

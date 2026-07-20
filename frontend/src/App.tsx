@@ -33,7 +33,6 @@ import { PrTicketsPage } from './pages/PrTicketsPage'
 import { RoleSelectionPage } from './pages/RoleSelectionPage'
 import { TicketPurchasePage } from './pages/TicketPurchasePage'
 import { TicketsPage } from './pages/TicketsPage'
-import { TransportPage } from './pages/TransportPage'
 import { SessionContext } from './session'
 import type {
   UserDto,
@@ -225,34 +224,6 @@ function App() {
               element={
                 user ? (
                   <PregameDetailPage />
-                ) : (
-                  <Navigate
-                    to="/role"
-                    replace
-                  />
-                )
-              }
-            />
-
-            <Route
-              path="/transport"
-              element={
-                user ? (
-                  <TransportPage />
-                ) : (
-                  <Navigate
-                    to="/role"
-                    replace
-                  />
-                )
-              }
-            />
-
-            <Route
-              path="/transport/:eventId"
-              element={
-                user ? (
-                  <TransportPage />
                 ) : (
                   <Navigate
                     to="/role"

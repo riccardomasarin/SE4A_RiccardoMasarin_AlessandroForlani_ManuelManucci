@@ -119,6 +119,12 @@ public class TicketService {
                 .toList();
     }
 
+    /*
+     * Crea una nuova richiesta.
+     *
+     * Stato iniziale:
+     * CREATION -> PENDING
+     */
     @Transactional
     public TicketDto requestTicket(
             TicketRequestDto request
@@ -145,6 +151,16 @@ public class TicketService {
                                         )
                         );
 
+        /*
+         * Non si possono richiedere nuovi ticket
+         * quando l'evento è già iniziato.
+         */
+        if (event.hasStarted(LocalDateTime.now())) {
+            throw new BadRequestException(
+                    "Tickets cannot be requested after the event has started."
+            );
+        }
+
         boolean duplicate =
                 ticketDataMediator.hasActiveTicket(
                         user.getId(),
@@ -158,24 +174,15 @@ public class TicketService {
             );
         }
 
-        long confirmed =
-                ticketDataMediator
-                        .countConfirmedTickets(
-                                event.getId()
-                        );
-
-        TicketStatus targetStatus =
-                confirmed < event.getCapacity()
-                        ? TicketStatus.CONFIRMED
-                        : TicketStatus.WAITING_LIST;
-
         String ticketType =
                 request.ticketType() == null
                                 || request
                                         .ticketType()
                                         .isBlank()
                         ? "Standard"
-                        : request.ticketType().trim();
+                        : request
+                                .ticketType()
+                                .trim();
 
         double basePrice =
                 ticketType.equalsIgnoreCase("VIP")
@@ -189,7 +196,7 @@ public class TicketService {
                 );
 
         double discountAmount = 0.0;
-        double commissionAmount = 0.0;
+
         String promoCodeUsed = null;
 
         if (prAssignment != null) {
@@ -203,25 +210,13 @@ public class TicketService {
                                             .getDiscountPercentage()
                                     / 100.0
                     );
-
-            if (
-                    targetStatus
-                            == TicketStatus.CONFIRMED
-            ) {
-                commissionAmount =
-                        roundMoney(
-                                prAssignment
-                                        .getCommissionPerTicket()
-                        );
-            }
         }
 
         double pricePaid =
                 roundMoney(
                         Math.max(
                                 0.0,
-                                basePrice
-                                        - discountAmount
+                                basePrice - discountAmount
                         )
                 );
 
@@ -243,6 +238,9 @@ public class TicketService {
                                     .trim();
         }
 
+        LocalDateTime creationTime =
+                LocalDateTime.now();
+
         Ticket ticket =
                 new Ticket(
                         generateCode(),
@@ -251,7 +249,7 @@ public class TicketService {
                         TicketStatus.PENDING,
                         ticketType,
                         pricePaid,
-                        LocalDateTime.now(),
+                        creationTime,
                         salesChannel,
                         "NIGHTOUT:"
                                 + event.getId()
@@ -259,27 +257,190 @@ public class TicketService {
                                 + user.getId()
                 );
 
+        ticket.setPrAssignment(
+                prAssignment
+        );
+
+        ticket.setPromoCodeUsed(
+                promoCodeUsed
+        );
+
+        ticket.setDiscountAmount(
+                discountAmount
+        );
+
+        ticket.setCommissionAmount(
+                0.0
+        );
+
+        Ticket savedTicket =
+                ticketDataMediator.saveTicket(
+                        ticket
+                );
+
+        eventPublisher.publishEvent(
+                new TicketNotificationEvent(
+                        user,
+                        NotificationType.RESERVATION_UPDATE,
+                        "Ticket request created for "
+                                + event.getTitle()
+                                + ". Confirm it within 15 minutes."
+                )
+        );
+
+        return mapper.toTicketDto(
+                savedTicket
+        );
+    }
+
+    /*
+     * Conferma una richiesta PENDING.
+     *
+     * PENDING -> CONFIRMED
+     * se c'è disponibilità.
+     *
+     * PENDING -> WAITING_LIST
+     * se l'evento è pieno.
+     *
+     * PENDING -> EXPIRED
+     * se la deadline è trascorsa
+     * oppure se l'evento è già iniziato.
+     */
+    @Transactional
+    public TicketDto confirmTicket(
+            Long ticketId
+    ) {
+        Ticket ticket =
+                ticketDataMediator
+                        .findTicketById(ticketId)
+                        .orElseThrow(
+                                () ->
+                                        new NotFoundException(
+                                                "Ticket not found: "
+                                                        + ticketId
+                                        )
+                        );
+
+        if (
+                ticket.getStatus()
+                        != TicketStatus.PENDING
+        ) {
+            throw new BadRequestException(
+                    "Only a pending ticket can be confirmed."
+            );
+        }
+
         TicketState pendingState =
                 TicketStateFactory.from(
                         ticket.getStatus()
                 );
 
+        LocalDateTime currentTime =
+                LocalDateTime.now();
+
+        boolean confirmationExpired =
+                ticket.isConfirmationExpired(
+                        currentTime
+                );
+
+        boolean eventStarted =
+                ticket
+                        .getEvent()
+                        .hasStarted(currentTime);
+
+        /*
+         * Una richiesta PENDING scade quando:
+         *
+         * - trascorrono i 15 minuti disponibili;
+         * - l'evento è già iniziato.
+         */
         if (
-                targetStatus
-                        == TicketStatus.CONFIRMED
+                confirmationExpired
+                        || eventStarted
         ) {
-            pendingState.confirm(ticket);
-        } else {
-            pendingState.moveToWaitingList(ticket);
+            pendingState.expire(
+                    ticket
+            );
+
+            ticket.setCommissionAmount(
+                    0.0
+            );
+
+            Ticket expiredTicket =
+                    ticketDataMediator.saveTicket(
+                            ticket
+                    );
+
+            String expirationMessage =
+                    eventStarted
+                            ? "Ticket request expired because the event "
+                                    + ticket
+                                            .getEvent()
+                                            .getTitle()
+                                    + " has already started."
+                            : "Ticket request expired for "
+                                    + ticket
+                                            .getEvent()
+                                            .getTitle()
+                                    + " because it was not confirmed in time.";
+
+            eventPublisher.publishEvent(
+                    new TicketNotificationEvent(
+                            ticket.getUser(),
+                            NotificationType.RESERVATION_UPDATE,
+                            expirationMessage
+                    )
+            );
+
+            return mapper.toTicketDto(
+                    expiredTicket
+            );
         }
 
-        ticket.setPrAssignment(prAssignment);
-        ticket.setPromoCodeUsed(promoCodeUsed);
-        ticket.setDiscountAmount(discountAmount);
-        ticket.setCommissionAmount(commissionAmount);
+        Event event =
+                ticket.getEvent();
+
+        long confirmedTickets =
+                ticketDataMediator
+                        .countConfirmedTickets(
+                                event.getId()
+                        );
+
+        boolean capacityAvailable =
+                confirmedTickets
+                        < event.getCapacity();
+
+        if (capacityAvailable) {
+            pendingState.confirm(
+                    ticket
+            );
+
+            if (
+                    ticket.getPrAssignment()
+                            != null
+            ) {
+                ticket.setCommissionAmount(
+                        roundMoney(
+                                ticket
+                                        .getPrAssignment()
+                                        .getCommissionPerTicket()
+                        )
+                );
+            }
+        } else {
+            pendingState.moveToWaitingList(
+                    ticket
+            );
+
+            ticket.setCommissionAmount(
+                    0.0
+            );
+        }
 
         Ticket savedTicket =
-                ticketDataMediator.saveTicket(ticket);
+                ticketDataMediator.saveTicket(
+                        ticket
+                );
 
         String message =
                 savedTicket.getStatus()
@@ -291,13 +452,182 @@ public class TicketService {
 
         eventPublisher.publishEvent(
                 new TicketNotificationEvent(
-                        user,
+                        ticket.getUser(),
                         NotificationType.RESERVATION_UPDATE,
                         message
                 )
         );
 
-        return mapper.toTicketDto(savedTicket);
+        return mapper.toTicketDto(
+                savedTicket
+        );
+    }
+
+    /*
+     * Gestisce tutte le transizioni automatiche
+     * legate al trascorrere del tempo:
+     *
+     * PENDING -> EXPIRED
+     * WAITING_LIST -> EXPIRED
+     * CONFIRMED -> EXPIRED
+     */
+    @Transactional
+    public void processAutomaticTicketTransitions() {
+        LocalDateTime currentTime =
+                LocalDateTime.now();
+
+        expirePendingTickets(
+                currentTime
+        );
+
+        expireWaitingListTickets(
+                currentTime
+        );
+
+        expireConfirmedTickets(
+                currentTime
+        );
+    }
+
+    /*
+     * PENDING -> EXPIRED
+     *
+     * Evento della macchina a stati:
+     * confirmationTimeout.
+     */
+    private void expirePendingTickets(
+            LocalDateTime currentTime
+    ) {
+        List<Ticket> tickets =
+                ticketDataMediator
+                        .findExpiredPendingTickets(
+                                currentTime
+                        );
+
+        for (Ticket ticket : tickets) {
+            TicketState currentState =
+                    TicketStateFactory.from(
+                            ticket.getStatus()
+                    );
+
+            currentState.expire(
+                    ticket
+            );
+
+            ticket.setCommissionAmount(
+                    0.0
+            );
+
+            ticketDataMediator.saveTicket(
+                    ticket
+            );
+
+            eventPublisher.publishEvent(
+                    new TicketNotificationEvent(
+                            ticket.getUser(),
+                            NotificationType.RESERVATION_UPDATE,
+                            "Ticket request expired for "
+                                    + ticket
+                                            .getEvent()
+                                            .getTitle()
+                                    + " because it was not confirmed in time."
+                    )
+            );
+        }
+    }
+
+    /*
+     * WAITING_LIST -> EXPIRED
+     *
+     * Evento della macchina a stati:
+     * eventStarted.
+     */
+    private void expireWaitingListTickets(
+            LocalDateTime currentTime
+    ) {
+        List<Ticket> tickets =
+                ticketDataMediator
+                        .findWaitingListTicketsForStartedEvents(
+                                currentTime
+                        );
+
+        for (Ticket ticket : tickets) {
+            TicketState currentState =
+                    TicketStateFactory.from(
+                            ticket.getStatus()
+                    );
+
+            currentState.expire(
+                    ticket
+            );
+
+            ticket.setCommissionAmount(
+                    0.0
+            );
+
+            ticketDataMediator.saveTicket(
+                    ticket
+            );
+
+            eventPublisher.publishEvent(
+                    new TicketNotificationEvent(
+                            ticket.getUser(),
+                            NotificationType.RESERVATION_UPDATE,
+                            "The waiting list for "
+                                    + ticket
+                                            .getEvent()
+                                            .getTitle()
+                                    + " is closed because the event has started."
+                    )
+            );
+        }
+    }
+
+    /*
+     * CONFIRMED -> EXPIRED
+     *
+     * Evento della macchina a stati:
+     * eventEnded.
+     *
+     * La commissione non viene eliminata:
+     * il ticket è stato effettivamente venduto
+     * e confermato.
+     */
+    private void expireConfirmedTickets(
+            LocalDateTime currentTime
+    ) {
+        List<Ticket> tickets =
+                ticketDataMediator
+                        .findConfirmedTicketsForEndedEvents(
+                                currentTime
+                        );
+
+        for (Ticket ticket : tickets) {
+            TicketState currentState =
+                    TicketStateFactory.from(
+                            ticket.getStatus()
+                    );
+
+            currentState.expire(
+                    ticket
+            );
+
+            ticketDataMediator.saveTicket(
+                    ticket
+            );
+
+            eventPublisher.publishEvent(
+                    new TicketNotificationEvent(
+                            ticket.getUser(),
+                            NotificationType.RESERVATION_UPDATE,
+                            "The event "
+                                    + ticket
+                                            .getEvent()
+                                            .getTitle()
+                                    + " has ended. The ticket is now expired."
+                    )
+            );
+        }
     }
 
     @Transactional
@@ -325,17 +655,23 @@ public class TicketService {
                 );
 
         try {
-            currentState.cancel(ticket);
+            currentState.cancel(
+                    ticket
+            );
         } catch (IllegalStateException exception) {
             throw new BadRequestException(
                     exception.getMessage()
             );
         }
 
-        ticket.setCommissionAmount(0.0);
+        ticket.setCommissionAmount(
+                0.0
+        );
 
         Ticket savedTicket =
-                ticketDataMediator.saveTicket(ticket);
+                ticketDataMediator.saveTicket(
+                        ticket
+                );
 
         eventPublisher.publishEvent(
                 new TicketNotificationEvent(
@@ -354,12 +690,29 @@ public class TicketService {
             );
         }
 
-        return mapper.toTicketDto(savedTicket);
+        return mapper.toTicketDto(
+                savedTicket
+        );
     }
 
+    /*
+     * Quando un ticket CONFIRMED viene cancellato,
+     * il primo ticket della waiting list viene
+     * promosso:
+     *
+     * WAITING_LIST -> CONFIRMED.
+     */
     private void promoteFirstWaitingTicket(
             Event event
     ) {
+        /*
+         * Dopo l'inizio dell'evento la waiting list
+         * è chiusa e nessun ticket può essere promosso.
+         */
+        if (event.hasStarted(LocalDateTime.now())) {
+            return;
+        }
+
         List<Ticket> waitingList =
                 ticketDataMediator
                         .findWaitingList(
@@ -379,7 +732,9 @@ public class TicketService {
                 );
 
         try {
-            waitingListState.confirm(promoted);
+            waitingListState.confirm(
+                    promoted
+            );
         } catch (IllegalStateException exception) {
             throw new BadRequestException(
                     exception.getMessage()
@@ -399,7 +754,9 @@ public class TicketService {
             );
         }
 
-        ticketDataMediator.saveTicket(promoted);
+        ticketDataMediator.saveTicket(
+                promoted
+        );
 
         eventPublisher.publishEvent(
                 new TicketNotificationEvent(

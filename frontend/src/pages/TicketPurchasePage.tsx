@@ -45,6 +45,12 @@ export function TicketPurchasePage() {
   const [submitting, setSubmitting] =
     useState(false)
 
+  const [confirming, setConfirming] =
+    useState(false)
+
+  const [cancelling, setCancelling] =
+    useState(false)
+
   const [error, setError] =
     useState('')
 
@@ -76,12 +82,81 @@ export function TicketPurchasePage() {
     }
   }, [promoCodeFromUrl])
 
+  /*
+   * Finché il ticket è PENDING, il frontend
+   * controlla periodicamente se lo scheduler
+   * del backend lo ha trasformato in EXPIRED.
+   */
+  useEffect(() => {
+    if (
+      !user
+      || !createdTicket
+      || createdTicket.status !== 'PENDING'
+    ) {
+      return
+    }
+
+    const intervalId = window.setInterval(
+      async () => {
+        try {
+          const tickets =
+            await nightoutApi.getTickets(
+              user.id,
+            )
+
+          const updatedTicket =
+            tickets.find(
+              (ticket) =>
+                ticket.id ===
+                createdTicket.id,
+            )
+
+          if (
+            updatedTicket
+            && updatedTicket.status
+              !== createdTicket.status
+          ) {
+            setCreatedTicket(
+              updatedTicket,
+            )
+
+            if (
+              updatedTicket.status
+                === 'EXPIRED'
+            ) {
+              setNotice(
+                'The confirmation time expired. The ticket request is no longer active.',
+              )
+            }
+          }
+        } catch {
+          /*
+           * Un errore temporaneo nel polling
+           * non interrompe il checkout.
+           */
+        }
+      },
+      10000,
+    )
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [
+    user,
+    createdTicket,
+  ])
+
   const selectedBasePrice =
     ticketType === 'VIP'
       ? event?.vipPrice ?? 0
       : event?.price ?? 0
 
-  async function buyTicket() {
+  /*
+   * Prima fase:
+   * crea il ticket nello stato PENDING.
+   */
+  async function requestPendingTicket() {
     if (!user || !event || submitting) {
       return
     }
@@ -106,19 +181,116 @@ export function TicketPurchasePage() {
 
       setCreatedTicket(ticket)
 
-      if (
-        ticket.status === 'WAITING_LIST'
-      ) {
-        setNotice(
-          'This event is currently full, so you have been added to the waiting list. We will confirm you automatically if a spot opens.',
-        )
-      }
+      setNotice(
+        'Ticket request created. Confirm it within 15 minutes to complete the reservation.',
+      )
     } catch (requestError) {
       setError(
         friendlyTicketError(requestError),
       )
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  /*
+   * Seconda fase:
+   *
+   * PENDING -> CONFIRMED
+   * oppure
+   * PENDING -> WAITING_LIST
+   * oppure
+   * PENDING -> EXPIRED
+   */
+  async function confirmPendingTicket() {
+    if (
+      !createdTicket
+      || createdTicket.status !== 'PENDING'
+      || confirming
+    ) {
+      return
+    }
+
+    setConfirming(true)
+    setError('')
+    setNotice('')
+
+    try {
+      const updatedTicket =
+        await nightoutApi.confirmTicket(
+          createdTicket.id,
+        )
+
+      setCreatedTicket(updatedTicket)
+
+      if (
+        updatedTicket.status
+          === 'CONFIRMED'
+      ) {
+        setNotice(
+          'Purchase confirmed successfully.',
+        )
+      } else if (
+        updatedTicket.status
+          === 'WAITING_LIST'
+      ) {
+        setNotice(
+          'This event is full. You have been added to the waiting list.',
+        )
+      } else if (
+        updatedTicket.status
+          === 'EXPIRED'
+      ) {
+        setNotice(
+          'The confirmation time expired. The ticket request is no longer active.',
+        )
+      }
+    } catch (confirmationError) {
+      setError(
+        friendlyTicketError(
+          confirmationError,
+        ),
+      )
+    } finally {
+      setConfirming(false)
+    }
+  }
+
+  /*
+   * Permette anche:
+   *
+   * PENDING -> CANCELLED
+   */
+  async function cancelPendingTicket() {
+    if (
+      !createdTicket
+      || createdTicket.status !== 'PENDING'
+      || cancelling
+    ) {
+      return
+    }
+
+    setCancelling(true)
+    setError('')
+    setNotice('')
+
+    try {
+      const updatedTicket =
+        await nightoutApi.cancelTicket(
+          createdTicket.id,
+        )
+
+      setCreatedTicket(updatedTicket)
+
+      setNotice(
+        'Ticket request cancelled.',
+      )
+    } catch (cancelError) {
+      setError(
+        friendlyTicketError(cancelError),
+      )
+    } finally {
+      setCancelling(false)
     }
   }
 
@@ -132,6 +304,22 @@ export function TicketPurchasePage() {
   }
 
   if (createdTicket) {
+    const isPending =
+      createdTicket.status === 'PENDING'
+
+    const isConfirmed =
+      createdTicket.status === 'CONFIRMED'
+
+    const isWaitingList =
+      createdTicket.status ===
+      'WAITING_LIST'
+
+    const isExpired =
+      createdTicket.status === 'EXPIRED'
+
+    const isCancelled =
+      createdTicket.status === 'CANCELLED'
+
     return (
       <section className="ticket-screen page-stack">
         <h1>Il mio biglietto</h1>
@@ -149,8 +337,7 @@ export function TicketPurchasePage() {
             </div>
 
             <span>
-              {createdTicket.status ===
-              'WAITING_LIST'
+              {isWaitingList
                 ? 'WAITING LIST'
                 : createdTicket.status}
             </span>
@@ -165,13 +352,35 @@ export function TicketPurchasePage() {
               {createdTicket.venueAddress}
             </p>
 
-            {createdTicket.status ===
-              'WAITING_LIST' && (
+            {isPending && (
+              <p className="inline-warning">
+                Your ticket request is pending.
+                Confirm it within 15 minutes or
+                it will expire automatically.
+              </p>
+            )}
+
+            {isWaitingList && (
               <p className="inline-warning">
                 This event is full. You are on
                 the waiting list and will be
                 promoted if a confirmed ticket
                 is cancelled.
+              </p>
+            )}
+
+            {isExpired && (
+              <p className="inline-error">
+                This ticket request expired
+                because it was not confirmed
+                within the available time.
+              </p>
+            )}
+
+            {isCancelled && (
+              <p className="inline-warning">
+                This ticket request has been
+                cancelled.
               </p>
             )}
 
@@ -254,9 +463,59 @@ export function TicketPurchasePage() {
               </span>
             </div>
 
-            <div className="qr-box">
-              {createdTicket.qrPayload}
-            </div>
+            {isConfirmed && (
+              <div className="qr-box">
+                {createdTicket.qrPayload}
+              </div>
+            )}
+
+            {isPending && (
+              <div className="page-stack">
+                <button
+                  className="primary-action"
+                  type="button"
+                  disabled={
+                    confirming
+                    || cancelling
+                  }
+                  onClick={
+                    confirmPendingTicket
+                  }
+                >
+                  {confirming
+                    ? 'Confirming...'
+                    : 'Confirm purchase'}
+                </button>
+
+                <button
+                  className="secondary-action"
+                  type="button"
+                  disabled={
+                    confirming
+                    || cancelling
+                  }
+                  onClick={
+                    cancelPendingTicket
+                  }
+                >
+                  {cancelling
+                    ? 'Cancelling...'
+                    : 'Cancel request'}
+                </button>
+              </div>
+            )}
+
+            {notice && (
+              <p className="inline-warning">
+                {notice}
+              </p>
+            )}
+
+            {error && (
+              <p className="inline-error">
+                {error}
+              </p>
+            )}
           </div>
         </article>
 
@@ -342,7 +601,7 @@ export function TicketPurchasePage() {
           <small>
             Enter the code shared by your PR.
             The discount will be verified when
-            you confirm the purchase.
+            the request is created.
           </small>
         </label>
 
@@ -364,21 +623,17 @@ export function TicketPurchasePage() {
         </div>
 
         <p className="body-copy">
-          No real payment is processed. The
-          backend creates a simulated ticket or
-          waiting-list entry.
+          No real payment is processed. First,
+          the backend creates a pending ticket
+          request. You must then confirm it
+          within 15 minutes.
         </p>
 
         {event.availableSpots === 0 && (
           <p className="inline-warning">
-            This event is full. Confirming will
-            place you on the waiting list.
-          </p>
-        )}
-
-        {notice && (
-          <p className="inline-warning">
-            {notice}
+            This event is full. Confirming the
+            pending request will place you on
+            the waiting list.
           </p>
         )}
 
@@ -392,11 +647,11 @@ export function TicketPurchasePage() {
           className="primary-action"
           type="button"
           disabled={submitting}
-          onClick={buyTicket}
+          onClick={requestPendingTicket}
         >
           {submitting
-            ? 'Confirming purchase...'
-            : 'Confirm mock purchase'}
+            ? 'Creating request...'
+            : 'Create ticket request'}
         </button>
       </article>
     </section>
@@ -435,10 +690,18 @@ function friendlyTicketError(
 
     if (
       normalizedMessage.includes(
+        'only a pending ticket',
+      )
+    ) {
+      return 'This ticket is no longer pending and cannot be confirmed.'
+    }
+
+    if (
+      normalizedMessage.includes(
         'not found',
       )
     ) {
-      return 'We could not find this event or demo user. Refresh the page and try again.'
+      return 'We could not find this event, ticket or demo user. Refresh the page and try again.'
     }
 
     if (message) {

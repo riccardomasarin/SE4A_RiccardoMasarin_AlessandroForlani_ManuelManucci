@@ -87,6 +87,7 @@ public class VenueManagementService {
                         request.description(),
                         venue,
                         request.startsAt(),
+                        request.endsAt(),
                         request.musicGenre(),
                         request.dressCode(),
                         request.ageRestriction(),
@@ -100,13 +101,26 @@ public class VenueManagementService {
                         manager
                 );
 
-        event.setAtmosphereScore(70);
-        event.setMusicScore(75);
-        event.setDrinkScore(65);
-        event.setLineScore(50);
+        event.setAtmosphereScore(
+                70
+        );
+
+        event.setMusicScore(
+                75
+        );
+
+        event.setDrinkScore(
+                65
+        );
+
+        event.setLineScore(
+                50
+        );
 
         Event savedEvent =
-                dataMediator.saveEvent(event);
+                dataMediator.saveEvent(
+                        event
+                );
 
         return mapper.toEventDetailDto(
                 savedEvent
@@ -188,39 +202,62 @@ public class VenueManagementService {
                                         )
                         );
 
-        event.setTitle(request.title());
+        event.setTitle(
+                request.title()
+        );
+
         event.setDescription(
                 request.description()
         );
-        event.setVenue(venue);
+
+        event.setVenue(
+                venue
+        );
+
         event.setStartsAt(
                 request.startsAt()
         );
+
+        event.setEndsAt(
+                request.endsAt()
+        );
+
         event.setMusicGenre(
                 request.musicGenre()
         );
+
         event.setDressCode(
                 request.dressCode()
         );
+
         event.setAgeRestriction(
                 request.ageRestriction()
         );
+
         event.setEntryCondition(
                 request.entryCondition()
         );
-        event.setPrice(request.price());
+
+        event.setPrice(
+                request.price()
+        );
+
         event.setVipPrice(
                 request.vipPrice()
         );
+
         event.setCapacity(
                 request.capacity()
         );
+
         event.setImageUrl(
                 request.imageUrl()
         );
 
         Event savedEvent =
-                dataMediator.saveEvent(event);
+                dataMediator.saveEvent(
+                        event
+                );
 
         return mapper.toEventDetailDto(
                 savedEvent
@@ -254,7 +291,9 @@ public class VenueManagementService {
             );
         }
 
-        dataMediator.deleteEvent(event);
+        dataMediator.deleteEvent(
+                event
+        );
     }
 
     @Transactional
@@ -288,7 +327,9 @@ public class VenueManagementService {
 
         Venue venue =
                 dataMediator
-                        .findVenueById(venueId)
+                        .findVenueById(
+                                venueId
+                        )
                         .orElseThrow(
                                 () ->
                                         new NotFoundException(
@@ -313,53 +354,65 @@ public class VenueManagementService {
         venue.setName(
                 request.name().trim()
         );
+
         venue.setCategory(
                 request.category()
         );
+
         venue.setAddress(
                 request.address().trim()
         );
+
         venue.setCity(
                 request.city().trim()
         );
+
         venue.setArea(
                 request.area().trim()
         );
+
         venue.setDescription(
                 normalizeOptionalText(
                         request.description()
                 )
         );
+
         venue.setImageUrl(
                 normalizeOptionalText(
                         request.imageUrl()
                 )
         );
+
         venue.setPhoneNumber(
                 normalizeOptionalText(
                         request.phoneNumber()
                 )
         );
+
         venue.setContactEmail(
                 normalizeOptionalText(
                         request.contactEmail()
                 )
         );
+
         venue.setWebsiteUrl(
                 normalizeOptionalText(
                         request.websiteUrl()
                 )
         );
+
         venue.setInstagramUrl(
                 normalizeOptionalText(
                         request.instagramUrl()
                 )
         );
+
         venue.setFacebookUrl(
                 normalizeOptionalText(
                         request.facebookUrl()
                 )
         );
+
         venue.setTiktokUrl(
                 normalizeOptionalText(
                         request.tiktokUrl()
@@ -367,7 +420,9 @@ public class VenueManagementService {
         );
 
         Venue savedVenue =
-                dataMediator.saveVenue(venue);
+                dataMediator.saveVenue(
+                        venue
+                );
 
         return mapper.toVenueDto(
                 savedVenue
