@@ -157,6 +157,21 @@ public class DemoDataLoader implements CommandLineRunner {
         Venue pineta = seedContext.venue("V004");
         Venue botanist = seedContext.venue("V005");
         Venue nottingham = seedContext.venue("V006");
+        Venue apollo = seedContext.venue("V007");
+        Venue plastic = seedContext.venue("V010");
+        Venue magnolia = seedContext.venue("V011");
+        Venue fabrique = seedContext.venue("V013");
+        Venue hollywood = seedContext.venue("V014");
+        Venue oldFashion = seedContext.venue("V015");
+        Venue magazzini = seedContext.venue("V016");
+        Venue justme = seedContext.venue("V017");
+        Venue gattopardo = seedContext.venue("V018");
+        Venue amnesia = seedContext.venue("V019");
+        Venue rocket = seedContext.venue("V021");
+        Venue blueNote = seedContext.venue("V022");
+        Venue biko = seedContext.venue("V023");
+        Venue ceresio = seedContext.venue("V025");
+        Venue deus = seedContext.venue("V028");
 
         Event crushFriday = event(
                 "Urban Beats",
@@ -278,13 +293,388 @@ public class DemoDataLoader implements CommandLineRunner {
                 61
         );
 
+        Event amnesiaMidnightPulse = event(
+                "Midnight Pulse",
+                "An all-night techno session built around immersive blue lighting, rolling bass and precision club sound.",
+                amnesia,
+                now.plusDays(5)
+                        .withHour(23)
+                        .withMinute(45),
+                MusicGenre.TECHNO,
+                "Dark clubwear",
+                "21+",
+                "Advance ticket or VIP area",
+                22,
+                42,
+                650,
+                96,
+                true,
+                "/images/events/techno-warehouse.jpg",
+                amnesia.getManager(),
+                92,
+                96,
+                78,
+                58
+        );
+
+        Event plasticNeonDistrict = event(
+                "Neon District",
+                "A high-colour celebration of pop, disco and club classics in one of Milan's most iconic alternative rooms.",
+                plastic,
+                now.plusDays(7)
+                        .withHour(23)
+                        .withMinute(0),
+                MusicGenre.POP,
+                "Expressive clubwear",
+                "18+",
+                "Standard ticket or guest list",
+                18,
+                32,
+                420,
+                90,
+                true,
+                "/images/events/queer-club-night.jpg",
+                plastic.getManager(),
+                95,
+                87,
+                84,
+                64
+        );
+
+        Event justmeSunsetRitual = event(
+                "Sunset Ritual",
+                "Golden-hour cocktails flow into melodic house beside Parco Sempione and the Torre Branca.",
+                justme,
+                now.plusDays(8)
+                        .withHour(19)
+                        .withMinute(30),
+                MusicGenre.HOUSE,
+                "Summer smart casual",
+                "21+",
+                "Aperitivo reservation or VIP table",
+                20,
+                55,
+                360,
+                89,
+                true,
+                "/images/events/navigli-house-session.jpg",
+                justme.getManager(),
+                93,
+                88,
+                92,
+                78
+        );
+
+        Event gattopardoVelvetNights = event(
+                "Velvet Nights",
+                "An elegant R&B and soul evening under Il Gattopardo's vaulted interior, followed by a late club set.",
+                gattopardo,
+                now.plusDays(10)
+                        .withHour(22)
+                        .withMinute(30),
+                MusicGenre.RNB,
+                "Elegant",
+                "23+",
+                "Guest list or VIP table",
+                28,
+                60,
+                500,
+                87,
+                true,
+                "/images/events/queer-club-night.jpg",
+                gattopardo.getManager(),
+                91,
+                86,
+                88,
+                57
+        );
+
+        Event oldFashionElectricGarden = event(
+                "Electric Garden",
+                "Open-air house grooves, garden lights and a late-night dance floor in Parco Sempione.",
+                oldFashion,
+                now.plusDays(12)
+                        .withHour(21)
+                        .withMinute(30),
+                MusicGenre.HOUSE,
+                "Smart casual",
+                "21+",
+                "Standard ticket or VIP table",
+                20,
+                45,
+                700,
+                91,
+                true,
+                "/images/events/navigli-house-session.jpg",
+                oldFashion.getManager(),
+                94,
+                92,
+                87,
+                52
+        );
+
+        Event hollywoodAfterdark = event(
+                "Afterdark",
+                "A polished late-night mix of commercial hits, dance anthems and table service on Corso Como.",
+                hollywood,
+                now.plusDays(14)
+                        .withHour(23)
+                        .withMinute(30),
+                MusicGenre.COMMERCIAL,
+                "Elegant clubwear",
+                "23+",
+                "Guest list or VIP table",
+                25,
+                55,
+                600,
+                85,
+                false,
+                "/images/events/covermln-1.jpg",
+                hollywood.getManager(),
+                88,
+                82,
+                90,
+                48
+        );
+
+        Event blueNoteMoonlightSessions = event(
+                "Moonlight Sessions",
+                "An intimate live set blending contemporary jazz, soul and late-night improvisation in the Isola district.",
+                blueNote,
+                now.plusDays(15)
+                        .withHour(21)
+                        .withMinute(0),
+                MusicGenre.LIVE_MUSIC,
+                "Smart casual",
+                "18+",
+                "Reserved seating",
+                38,
+                62,
+                220,
+                86,
+                true,
+                "/images/events/international-students-night.jpg",
+                blueNote.getManager(),
+                90,
+                95,
+                89,
+                82
+        );
+
+        Event bikoUrbanFrequencies = event(
+                "Urban Frequencies",
+                "Live hip-hop, neo-soul and beat-driven performances from emerging Milan artists.",
+                biko,
+                now.plusDays(17)
+                        .withHour(21)
+                        .withMinute(30),
+                MusicGenre.HIP_HOP,
+                "Casual",
+                "18+",
+                "Advance ticket",
+                16,
+                25,
+                300,
+                82,
+                false,
+                "/images/events/reggaeton-latin-urban-night.jpg",
+                biko.getManager(),
+                87,
+                92,
+                75,
+                68
+        );
+
+        Event ceresioSkylineBeats = event(
+                "Skyline Beats",
+                "Rooftop house and nu-disco with poolside cocktails and panoramic views over Milan.",
+                ceresio,
+                now.plusDays(19)
+                        .withHour(20)
+                        .withMinute(0),
+                MusicGenre.HOUSE,
+                "Rooftop chic",
+                "21+",
+                "Aperitivo reservation or VIP table",
+                30,
+                70,
+                240,
+                93,
+                true,
+                "/images/events/navigli-house-session.jpg",
+                ceresio.getManager(),
+                96,
+                91,
+                95,
+                80
+        );
+
+        Event apolloSecretRoom = event(
+                "Secret Room",
+                "An intimate house night in Apollo Club's retro rooms, with vinyl selections and late cocktails.",
+                apollo,
+                now.plusDays(21)
+                        .withHour(22)
+                        .withMinute(30),
+                MusicGenre.HOUSE,
+                "Retro casual",
+                "21+",
+                "Limited advance ticket",
+                17,
+                30,
+                180,
+                78,
+                false,
+                "/images/events/queer-club-night.jpg",
+                apollo.getManager(),
+                86,
+                89,
+                84,
+                74
+        );
+
+        Event rocketNavigliResonance = event(
+                "Navigli Resonance",
+                "Indie dance, synth-pop and electronic cuts in an underground club beside the Naviglio Grande.",
+                rocket,
+                now.plusDays(23)
+                        .withHour(23)
+                        .withMinute(0),
+                MusicGenre.POP,
+                "Casual",
+                "18+",
+                "Standard ticket",
+                15,
+                25,
+                280,
+                80,
+                false,
+                "/images/events/tempio-del-futuro-perduto-1-club-milano-xceed-efaa.jpg",
+                rocket.getManager(),
+                84,
+                88,
+                72,
+                66
+        );
+
+        Event magazziniWarehouseSignal = event(
+                "Warehouse Signal",
+                "Raw industrial techno, warehouse visuals and an extended closing set at Magazzini Generali.",
+                magazzini,
+                now.plusDays(25)
+                        .withHour(23)
+                        .withMinute(45),
+                MusicGenre.TECHNO,
+                "Black casual",
+                "21+",
+                "Advance ticket only",
+                26,
+                45,
+                900,
+                94,
+                true,
+                "/images/events/after-exams-party.jpg",
+                magazzini.getManager(),
+                91,
+                97,
+                76,
+                45
+        );
+
+        Event magnoliaOpenAirEchoes = event(
+                "Open Air Echoes",
+                "An open-air programme of alternative rock and live bands beside the Idroscalo.",
+                magnolia,
+                now.plusDays(27)
+                        .withHour(20)
+                        .withMinute(30),
+                MusicGenre.ROCK,
+                "Relaxed outdoor",
+                "16+",
+                "Standard ticket",
+                22,
+                35,
+                1200,
+                88,
+                true,
+                "/images/events/international-students-night.jpg",
+                magnolia.getManager(),
+                95,
+                94,
+                80,
+                70
+        );
+
+        Event deusVinylCourtyard = event(
+                "Vinyl Courtyard",
+                "Selectors spin funk, soul and house records in Deus Cafe's hidden Isola courtyard.",
+                deus,
+                now.plusDays(29)
+                        .withHour(19)
+                        .withMinute(30),
+                MusicGenre.HOUSE,
+                "Relaxed",
+                "18+",
+                "Free entry before 21:00",
+                0,
+                18,
+                160,
+                74,
+                false,
+                "/images/events/navigli-house-session.jpg",
+                deus.getManager(),
+                89,
+                84,
+                91,
+                85
+        );
+
+        Event fabriqueLatinVoltage = event(
+                "Latin Voltage",
+                "A large-format Latin and reggaeton night with live performers, dance crews and a full-stage finale.",
+                fabrique,
+                now.plusDays(31)
+                        .withHour(22)
+                        .withMinute(0),
+                MusicGenre.LATIN,
+                "Colourful clubwear",
+                "18+",
+                "Standard ticket or VIP area",
+                24,
+                45,
+                1500,
+                92,
+                true,
+                "/images/events/reggaeton-latin-urban-night.jpg",
+                fabrique.getManager(),
+                95,
+                93,
+                82,
+                50
+        );
+
         eventRepository.saveAll(
                 List.of(
                         crushFriday,
                         fabricNight,
                         voltHouse,
                         pinetaPop,
-                        fullHollywood
+                        fullHollywood,
+                        amnesiaMidnightPulse,
+                        plasticNeonDistrict,
+                        justmeSunsetRitual,
+                        gattopardoVelvetNights,
+                        oldFashionElectricGarden,
+                        hollywoodAfterdark,
+                        blueNoteMoonlightSessions,
+                        bikoUrbanFrequencies,
+                        ceresioSkylineBeats,
+                        apolloSecretRoom,
+                        rocketNavigliResonance,
+                        magazziniWarehouseSignal,
+                        magnoliaOpenAirEchoes,
+                        deusVinylCourtyard,
+                        fabriqueLatinVoltage
                 )
         );
 
@@ -325,7 +715,22 @@ public class DemoDataLoader implements CommandLineRunner {
                         fabricNight,
                         voltHouse,
                         pinetaPop,
-                        fullHollywood
+                        fullHollywood,
+                        amnesiaMidnightPulse,
+                        plasticNeonDistrict,
+                        justmeSunsetRitual,
+                        gattopardoVelvetNights,
+                        oldFashionElectricGarden,
+                        hollywoodAfterdark,
+                        blueNoteMoonlightSessions,
+                        bikoUrbanFrequencies,
+                        ceresioSkylineBeats,
+                        apolloSecretRoom,
+                        rocketNavigliResonance,
+                        magazziniWarehouseSignal,
+                        magnoliaOpenAirEchoes,
+                        deusVinylCourtyard,
+                        fabriqueLatinVoltage
                 )
         );
 
