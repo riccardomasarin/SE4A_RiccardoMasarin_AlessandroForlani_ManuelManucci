@@ -125,7 +125,7 @@
   color: var(--violet);
 }
 
-/* 02. AVVIO, STATI E SELEZIONE RUOLO ==================================== */
+/* 02. AVVIO, STATI E LOGIN ================================================ */
 .boot-screen,
 .state-block,
 .role-screen {
@@ -5643,4 +5643,50 @@
   .recommendation-feed-empty {
     padding: 15px;
   }
+}
+
+.login-form {
+  display: grid;
+  width: min(100%, 420px);
+  gap: 16px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  text-align: left;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.login-form label {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.login-form input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.login-form input:focus {
+  border-color: var(--violet);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.12);
+}
+
+.login-form .primary-action {
+  width: 100%;
+}
+
+.login-form .primary-action:disabled,
+.login-form input:disabled {
+  cursor: wait;
+  opacity: 0.7;
 }

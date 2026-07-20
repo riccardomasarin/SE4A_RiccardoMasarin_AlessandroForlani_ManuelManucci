@@ -7,6 +7,7 @@ import type {
   EventSummaryDto,
   FriendshipDto,
   FriendUserDto,
+  LoginResponseDto,
   ManagerDashboardDto,
   MusicGenre,
   NotificationDto,
@@ -113,6 +114,29 @@ export interface UpdateProfileRequest {
 }
 
 export const nightoutApi = {
+  async login(
+    email: string,
+    password: string,
+  ): Promise<LoginResponseDto> {
+    const response =
+      await client.post<LoginResponseDto>(
+        '/auth/login',
+        { email, password },
+      )
+
+    return response.data
+  },
+
+  async getUser(
+    profileId: number,
+  ): Promise<UserDto> {
+    const response = await client.get<UserDto>(
+      `/users/${profileId}`,
+    )
+
+    return response.data
+  },
+
   async getSession(role: UserRole): Promise<UserDto> {
     const response = await client.get<UserDto>('/demo/session', {
       params: { role },

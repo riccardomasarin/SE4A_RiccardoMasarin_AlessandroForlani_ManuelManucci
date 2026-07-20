@@ -7,12 +7,12 @@ import type { UserDto } from '../types/nightout'
 
 interface AppShellProps {
   user: UserDto | null
-  onResetRole: () => void
+  onLogout: () => void
 }
 
 export function AppShell({
   user,
-  onResetRole,
+  onLogout,
 }: AppShellProps) {
   const location = useLocation()
 
@@ -25,6 +25,7 @@ export function AppShell({
   const isManager = isVenue || isPr
 
   const showNav =
+    location.pathname !== '/login' &&
     location.pathname !== '/role'
 
   const navigationColumns = isPr
@@ -48,7 +49,7 @@ export function AppShell({
           <button
             className="avatar-button"
             type="button"
-            onClick={onResetRole}
+            onClick={onLogout}
             aria-label="Log out"
           >
             <span>

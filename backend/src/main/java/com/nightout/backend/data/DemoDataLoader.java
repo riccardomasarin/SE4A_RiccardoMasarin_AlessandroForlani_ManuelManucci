@@ -1248,6 +1248,7 @@ public class DemoDataLoader implements CommandLineRunner {
                     seed.musicPreferences()
                             .toArray(String[]::new)
             );
+            appUser.setPassword(seed.password());
 
             registerProfile(
                     seed.workbookId(),
@@ -1290,6 +1291,7 @@ public class DemoDataLoader implements CommandLineRunner {
                     seed.musicPreferences()
                             .toArray(String[]::new)
             );
+            appUser.setPassword(seed.password());
 
             registerProfile(
                     seed.workbookId(),
@@ -1348,6 +1350,7 @@ public class DemoDataLoader implements CommandLineRunner {
                             ? new String[]{"House", "Techno"}
                             : new String[0]
             );
+            appUser.setPassword(managerSeed.password());
 
             registerEmail(appUser, usersByEmail);
             managersByEmail.put(managerEmail, appUser);
@@ -1641,6 +1644,10 @@ public class DemoDataLoader implements CommandLineRunner {
                 || !Objects.equals(
                         first.avatarUrl(),
                         repeated.avatarUrl()
+                )
+                || !Objects.equals(
+                        first.password(),
+                        repeated.password()
                 )) {
             throw new IllegalStateException(
                     "Conflicting manager rows for " + email

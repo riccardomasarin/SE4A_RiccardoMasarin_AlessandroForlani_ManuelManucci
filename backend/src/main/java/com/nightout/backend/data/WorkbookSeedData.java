@@ -52,6 +52,7 @@ record WorkbookSeedData(
             Integer age,
             String birthDate,
             String email,
+            String password,
             String city,
             String area,
             Double latitude,
@@ -73,6 +74,7 @@ record WorkbookSeedData(
             Integer age,
             String birthDate,
             String email,
+            String password,
             String city,
             Double latitude,
             Double longitude,
@@ -90,6 +92,7 @@ record WorkbookSeedData(
             String surname,
             String fullName,
             String email,
+            String password,
             String city,
             boolean verified,
             String avatarUrl

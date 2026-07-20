@@ -3,6 +3,7 @@ import {
   useMemo,
   useState,
 } from 'react'
+import type { ReactNode } from 'react'
 import {
   BrowserRouter,
   Navigate,
@@ -35,63 +36,169 @@ import { TicketPurchasePage } from './pages/TicketPurchasePage'
 import { TicketsPage } from './pages/TicketsPage'
 import { SessionContext } from './session'
 import type {
+  AuthenticationRole,
+  LoginResponseDto,
   UserDto,
   UserRole,
 } from './types/nightout'
 import './App.css'
 
-const storedRoleKey = 'nightout-demo-role'
+const storedSessionKey = 'nightout-auth-session'
+
+function homeForRole(role: UserRole) {
+  if (role === 'VENUE_MANAGER') {
+    return '/manager'
+  }
+  if (role === 'PR_MANAGER') {
+    return '/pr'
+  }
+  return '/feed'
+}
+
+function authenticationRoleFor(
+  role: UserRole,
+): AuthenticationRole {
+  if (role === 'VENUE_MANAGER') {
+    return 'VENUE'
+  }
+  if (role === 'PR_MANAGER') {
+    return 'PR'
+  }
+  return 'USER'
+}
+
+function readStoredSession(): LoginResponseDto | null {
+  const stored = localStorage.getItem(
+    storedSessionKey,
+  )
+
+  if (!stored) {
+    return null
+  }
+
+  try {
+    const parsed = JSON.parse(stored) as Partial<LoginResponseDto>
+    const validRole =
+      parsed.role === 'USER' ||
+      parsed.role === 'VENUE' ||
+      parsed.role === 'PR'
+
+    if (
+      parsed.authenticated !== true ||
+      typeof parsed.profileId !== 'number' ||
+      typeof parsed.displayName !== 'string' ||
+      typeof parsed.email !== 'string' ||
+      !validRole
+    ) {
+      return null
+    }
+
+    return parsed as LoginResponseDto
+  } catch {
+    return null
+  }
+}
+
+function ProtectedPage({
+  user,
+  role,
+  children,
+}: {
+  user: UserDto | null
+  role: UserRole
+  children: ReactNode
+}) {
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+
+  if (user.role !== role) {
+    return (
+      <Navigate
+        to={homeForRole(user.role)}
+        replace
+      />
+    )
+  }
+
+  return children
+}
 
 function App() {
+  const [storedSession] = useState(
+    readStoredSession,
+  )
+
   const [user, setUser] =
     useState<UserDto | null>(null)
 
   const [loadingSession, setLoadingSession] =
-    useState(true)
+    useState(storedSession !== null)
 
   useEffect(() => {
-    const role = localStorage.getItem(
-      storedRoleKey,
-    ) as UserRole | null
-
-    if (!role) {
-      setLoadingSession(false)
+    if (!storedSession) {
+      localStorage.removeItem(storedSessionKey)
       return
     }
 
     nightoutApi
-      .getSession(role)
-      .then(setUser)
+      .getUser(storedSession.profileId)
+      .then((storedUser) => {
+        if (
+          authenticationRoleFor(storedUser.role) !==
+          storedSession.role
+        ) {
+          throw new Error('Stored session role does not match profile')
+        }
+
+        setUser(storedUser)
+      })
       .catch(() => {
-        localStorage.removeItem(storedRoleKey)
+        localStorage.removeItem(storedSessionKey)
       })
       .finally(() => {
         setLoadingSession(false)
       })
-  }, [])
+  }, [storedSession])
 
   const session = useMemo(
     () => ({
       user,
       loadingSession,
 
-      async selectRole(role: UserRole) {
+      async login(
+        email: string,
+        password: string,
+      ) {
+        const authentication =
+          await nightoutApi.login(
+            email.trim(),
+            password,
+          )
+
         const nextUser =
-          await nightoutApi.getSession(role)
+          await nightoutApi.getUser(
+            authentication.profileId,
+          )
+
+        if (
+          authenticationRoleFor(nextUser.role) !==
+          authentication.role
+        ) {
+          throw new Error('Authenticated role does not match profile')
+        }
 
         localStorage.setItem(
-          storedRoleKey,
-          role,
+          storedSessionKey,
+          JSON.stringify(authentication),
         )
 
         setUser(nextUser)
+        return nextUser
       },
 
-      resetRole() {
-        localStorage.removeItem(
-          storedRoleKey,
-        )
-
+      logout() {
+        localStorage.removeItem(storedSessionKey)
         setUser(null)
       },
     }),
@@ -102,7 +209,7 @@ function App() {
     return (
       <div className="boot-screen">
         <strong>NightOUT</strong>
-        <span>Loading demo session</span>
+        <span>Loading session</span>
       </div>
     )
   }
@@ -115,317 +222,205 @@ function App() {
             element={
               <AppShell
                 user={user}
-                onResetRole={
-                  session.resetRole
-                }
+                onLogout={session.logout}
               />
             }
           >
             <Route
+              path="/login"
+              element={
+                user ? (
+                  <Navigate
+                    to={homeForRole(user.role)}
+                    replace
+                  />
+                ) : (
+                  <RoleSelectionPage />
+                )
+              }
+            />
+
+            <Route
               path="/role"
-              element={<RoleSelectionPage />}
+              element={
+                <Navigate to="/login" replace />
+              }
             />
 
             <Route
               path="/"
               element={
-                user ? (
-                  <Navigate
-                    to={
-                      user.role === 'PR_MANAGER'
-                        ? '/pr'
-                        : user.role === 'VENUE_MANAGER'
-                          ? '/manager'
-                          : '/feed'
-                    }
-                    replace
-                  />
-                ) : (
-                  <Navigate
-                    to="/role"
-                    replace
-                  />
-                )
+                <Navigate
+                  to={
+                    user
+                      ? homeForRole(user.role)
+                      : '/login'
+                  }
+                  replace
+                />
               }
             />
 
             <Route
               path="/feed"
               element={
-                user ? (
+                <ProtectedPage user={user} role="NORMAL_USER">
                   <DiscoveryFeedPage />
-                ) : (
-                  <Navigate
-                    to="/role"
-                    replace
-                  />
-                )
+                </ProtectedPage>
               }
             />
-
             <Route
               path="/events/:id"
               element={
-                user ? (
+                <ProtectedPage user={user} role="NORMAL_USER">
                   <EventDetailPage />
-                ) : (
-                  <Navigate
-                    to="/role"
-                    replace
-                  />
-                )
+                </ProtectedPage>
               }
             />
-
             <Route
               path="/checkout/:eventId"
               element={
-                user ? (
+                <ProtectedPage user={user} role="NORMAL_USER">
                   <TicketPurchasePage />
-                ) : (
-                  <Navigate
-                    to="/role"
-                    replace
-                  />
-                )
+                </ProtectedPage>
               }
             />
-
             <Route
               path="/tickets"
               element={
-                user ? (
+                <ProtectedPage user={user} role="NORMAL_USER">
                   <TicketsPage />
-                ) : (
-                  <Navigate
-                    to="/role"
-                    replace
-                  />
-                )
+                </ProtectedPage>
               }
             />
-
             <Route
               path="/pregames"
               element={
-                user ? (
+                <ProtectedPage user={user} role="NORMAL_USER">
                   <PregamePage />
-                ) : (
-                  <Navigate
-                    to="/role"
-                    replace
-                  />
-                )
+                </ProtectedPage>
               }
             />
-
             <Route
               path="/pregames/:roomId"
               element={
-                user ? (
+                <ProtectedPage user={user} role="NORMAL_USER">
                   <PregameDetailPage />
-                ) : (
-                  <Navigate
-                    to="/role"
-                    replace
-                  />
-                )
+                </ProtectedPage>
+              }
+            />
+            <Route
+              path="/notifications"
+              element={
+                <ProtectedPage user={user} role="NORMAL_USER">
+                  <NotificationsPage />
+                </ProtectedPage>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedPage user={user} role="NORMAL_USER">
+                  <ProfilePage />
+                </ProtectedPage>
+              }
+            />
+            <Route
+              path="/payment-methods"
+              element={
+                <ProtectedPage user={user} role="NORMAL_USER">
+                  <PaymentMethodsPage />
+                </ProtectedPage>
+              }
+            />
+            <Route
+              path="/privacy-settings"
+              element={
+                <ProtectedPage user={user} role="NORMAL_USER">
+                  <PrivacySettingsPage />
+                </ProtectedPage>
+              }
+            />
+            <Route
+              path="/help-support"
+              element={
+                <ProtectedPage user={user} role="NORMAL_USER">
+                  <HelpSupportPage />
+                </ProtectedPage>
               }
             />
 
             <Route
               path="/manager"
               element={
-                user ? (
+                <ProtectedPage user={user} role="VENUE_MANAGER">
                   <ManagerDashboardPage />
-                ) : (
-                  <Navigate
-                    to="/role"
-                    replace
-                  />
-                )
+                </ProtectedPage>
               }
             />
-
             <Route
               path="/manager/events"
               element={
-                user ? (
+                <ProtectedPage user={user} role="VENUE_MANAGER">
                   <ManagerEventsPage />
-                ) : (
-                  <Navigate
-                    to="/role"
-                    replace
-                  />
-                )
+                </ProtectedPage>
               }
             />
-
             <Route
               path="/manager/events/new"
               element={
-                user ? (
+                <ProtectedPage user={user} role="VENUE_MANAGER">
                   <ManagerCreateEventPage />
-                ) : (
-                  <Navigate
-                    to="/role"
-                    replace
-                  />
-                )
+                </ProtectedPage>
               }
             />
-
             <Route
               path="/manager/tickets"
               element={
-                user ? (
+                <ProtectedPage user={user} role="VENUE_MANAGER">
                   <ManagerTicketsPage />
-                ) : (
-                  <Navigate
-                    to="/role"
-                    replace
-                  />
-                )
+                </ProtectedPage>
               }
             />
-
             <Route
               path="/manager/promotions"
               element={
-                user ? (
+                <ProtectedPage user={user} role="VENUE_MANAGER">
                   <ManagerPromotionsPage />
-                ) : (
-                  <Navigate
-                    to="/role"
-                    replace
-                  />
-                )
+                </ProtectedPage>
               }
             />
-
             <Route
               path="/manager/profile"
               element={
-                user ? (
+                <ProtectedPage user={user} role="VENUE_MANAGER">
                   <ManagerVenueProfilePage />
-                ) : (
-                  <Navigate
-                    to="/role"
-                    replace
-                  />
-                )
+                </ProtectedPage>
               }
             />
 
             <Route
               path="/pr"
               element={
-                user?.role === 'PR_MANAGER' ? (
+                <ProtectedPage user={user} role="PR_MANAGER">
                   <PrDashboardPage />
-                ) : (
-                  <Navigate
-                    to={user ? '/' : '/role'}
-                    replace
-                  />
-                )
+                </ProtectedPage>
               }
             />
-
             <Route
               path="/pr/tickets"
               element={
-                user?.role === 'PR_MANAGER' ? (
+                <ProtectedPage user={user} role="PR_MANAGER">
                   <PrTicketsPage />
-                ) : (
-                  <Navigate
-                    to={user ? '/' : '/role'}
-                    replace
-                  />
-                )
+                </ProtectedPage>
               }
             />
-
             <Route
               path="/pr/account"
               element={
-                user?.role === 'PR_MANAGER' ? (
+                <ProtectedPage user={user} role="PR_MANAGER">
                   <PrAccountPage />
-                ) : (
-                  <Navigate
-                    to={user ? '/' : '/role'}
-                    replace
-                  />
-                )
-              }
-            />
-
-            <Route
-              path="/notifications"
-              element={
-                user ? (
-                  <NotificationsPage />
-                ) : (
-                  <Navigate
-                    to="/role"
-                    replace
-                  />
-                )
-              }
-            />
-
-            <Route
-              path="/profile"
-              element={
-                user ? (
-                  <ProfilePage />
-                ) : (
-                  <Navigate
-                    to="/role"
-                    replace
-                  />
-                )
-              }
-            />
-
-            <Route
-              path="/payment-methods"
-              element={
-                user ? (
-                  <PaymentMethodsPage />
-                ) : (
-                  <Navigate
-                    to="/role"
-                    replace
-                  />
-                )
-              }
-            />
-
-            <Route
-              path="/privacy-settings"
-              element={
-                user ? (
-                  <PrivacySettingsPage />
-                ) : (
-                  <Navigate
-                    to="/role"
-                    replace
-                  />
-                )
-              }
-            />
-
-            <Route
-              path="/help-support"
-              element={
-                user ? (
-                  <HelpSupportPage />
-                ) : (
-                  <Navigate
-                    to="/role"
-                    replace
-                  />
-                )
+                </ProtectedPage>
               }
             />
 

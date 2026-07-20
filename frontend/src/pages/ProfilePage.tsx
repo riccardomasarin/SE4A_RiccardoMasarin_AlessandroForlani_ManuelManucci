@@ -47,7 +47,7 @@ function resolveAvatarUrl(avatarUrl?: string | null) {
 }
 
 export function ProfilePage() {
-  const { user, resetRole } = useSession();
+  const { user, logout } = useSession();
 
   const [profile, setProfile] = useState<ProfileDto | null>(null);
 
@@ -140,7 +140,7 @@ export function ProfilePage() {
     const confirmed = window.confirm("Are you sure you want to log out?");
 
     if (confirmed) {
-      resetRole();
+      logout();
     }
   };
 

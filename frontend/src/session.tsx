@@ -1,11 +1,14 @@
 import { createContext, useContext } from 'react'
-import type { UserDto, UserRole } from './types/nightout'
+import type { UserDto } from './types/nightout'
 
 export interface SessionContextValue {
   user: UserDto | null
   loadingSession: boolean
-  selectRole: (role: UserRole) => Promise<void>
-  resetRole: () => void
+  login: (
+    email: string,
+    password: string,
+  ) => Promise<UserDto>
+  logout: () => void
 }
 
 export const SessionContext = createContext<SessionContextValue | null>(null)

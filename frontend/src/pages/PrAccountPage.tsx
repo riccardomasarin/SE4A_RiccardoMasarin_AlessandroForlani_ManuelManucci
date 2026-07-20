@@ -68,7 +68,7 @@ function parseMusicPreferences(
 }
 
 export function PrAccountPage() {
-  const { user, resetRole } =
+  const { user, logout } =
     useSession()
 
   const [profile, setProfile] =
@@ -207,7 +207,7 @@ export function PrAccountPage() {
     )
 
     if (confirmed) {
-      resetRole()
+      logout()
     }
   }
 

@@ -35,6 +35,72 @@ npm run dev
 
 Open `http://localhost:5173`.
 
+## Demo authentication
+
+NightOUT uses a deliberately small authentication flow for the academic demo:
+
+1. The login page at `/login` sends the entered credentials to `POST /api/auth/login`.
+2. The backend finds the existing `AppUser` by email, checks its demo password, and derives the public authentication role from the stored `UserRole`.
+3. The frontend stores only `authenticated`, `profileId`, `displayName`, `email`, and the public role in `localStorage` under `nightout-auth-session`. The password is never stored in the browser.
+4. On refresh, the frontend reloads the existing profile through `GET /api/users/{profileId}` and verifies that its persisted role still matches the stored session.
+5. Logout removes the stored session. Protected pages then redirect to `/login`.
+
+The role mapping is:
+
+| Stored profile role | Login response role | Home route | Allowed application area |
+|---|---|---|---|
+| `NORMAL_USER` | `USER` | `/feed` | User feed, events, tickets, pregames, notifications, and account pages |
+| `VENUE_MANAGER` | `VENUE` | `/manager` | Existing venue-manager dashboard and `/manager/*` pages |
+| `PR_MANAGER` | `PR` | `/pr` | Existing PR dashboard and `/pr/*` pages |
+
+An authenticated profile that opens a route for another role is redirected to its own home route. The legacy `/role` URL redirects to `/login`; the existing `/api/demo/session` endpoint is retained for backward compatibility but is no longer used by the frontend.
+
+### Demo credentials
+
+| Role | Existing profile | Email | Password |
+|---|---|---|---|
+| `USER` | Daniele Lorenzano | `daniele.lorenzano@nightout.demo` | `user123` |
+| `VENUE` | Matteo Conti | `matteo.conti@nightout.demo` | `venue123` |
+| `PR` | Filippo Scaranello | `filippo.scaranello@nightout.demo` | `pr123` |
+
+Passwords are stored as plain text only because this is an in-memory academic demo with no production authentication infrastructure. This implementation does not use Spring Security, password hashing, server sessions, JWTs, or backend authorization tokens and must not be used as production authentication. The client-side route guard improves the demo flow but is not a security boundary; the current APIs still identify profiles through request IDs.
+
+### Authentication implementation files
+
+New files:
+
+- `backend/src/main/java/com/nightout/backend/controller/AuthController.java`: exposes the login endpoint.
+- `backend/src/main/java/com/nightout/backend/dto/LoginRequestDto.java`: validates the credential request.
+- `backend/src/main/java/com/nightout/backend/dto/LoginResponseDto.java`: returns only the session fields needed by the frontend.
+- `backend/src/main/java/com/nightout/backend/service/AuthenticationService.java`: checks credentials against the existing profile repository and maps roles.
+- `backend/src/test/java/com/nightout/backend/AuthControllerTests.java`: covers valid roles, invalid credentials, and password omission.
+
+Modified files:
+
+- `backend/src/main/java/com/nightout/backend/entity/AppUser.java`: adds the demo-only password field to the existing profile entity.
+- `backend/src/main/java/com/nightout/backend/repository/AppUserRepository.java`: adds case-insensitive email lookup.
+- `backend/src/main/java/com/nightout/backend/data/WorkbookSeedData.java`, `backend/src/main/java/com/nightout/backend/data/DemoDataLoader.java`, and `backend/src/main/resources/demo/nightout-workbook-seed.json`: attach three demo credentials to existing profiles.
+- `frontend/src/App.tsx` and `frontend/src/session.tsx`: persist/restore authentication, provide login/logout, redirect by role, and protect routes.
+- `frontend/src/api/nightoutApi.ts` and `frontend/src/types/nightout.ts`: add typed login/profile API support.
+- `frontend/src/pages/RoleSelectionPage.tsx`: replaces manual role selection with the credential form while retaining the existing component file.
+- `frontend/src/components/AppShell.tsx`, `frontend/src/pages/ProfilePage.tsx`, and `frontend/src/pages/PrAccountPage.tsx`: connect existing logout actions to the authenticated session.
+- `frontend/src/App.css`: styles the login form using the current visual system.
+- `docs/api-overview.md` and this `README.md`: document the endpoint, flow, roles, credentials, routes, limitations, and implementation files.
+
+### Test commands
+
+From the project root:
+
+```powershell
+cd backend
+.\mvnw.cmd test
+
+cd ..\frontend
+npm install
+npm run build
+npm run lint
+```
+
 ## Workbook-derived demo data
 
 The workbook `Template_raccolta_dati_NightOut.xlsx` is the authoritative source for the fields it contains. It was converted once into `backend/src/main/resources/demo/nightout-workbook-seed.json`; the application does not parse Excel at runtime. `DemoDataLoader` reads that classpath JSON when the in-memory H2 database is empty and then adds the existing event, ticket, pregame, promotion, social, notification, sales-channel, and return-transport demo data.
@@ -122,4 +188,4 @@ Invoke-RestMethod http://localhost:8080/api/events
 Invoke-RestMethod http://localhost:8080/api/partner-bars
 ```
 
-The normal-user mock session starts with Daniele Lorenzano, the PR session with Filippo Scaranello, and the venue-manager session with Matteo Conti.
+The authenticated demo profiles are Daniele Lorenzano, Filippo Scaranello, and Matteo Conti; their credentials are listed in the demo authentication section above.

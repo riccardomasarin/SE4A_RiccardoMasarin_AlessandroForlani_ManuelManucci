@@ -16,6 +16,7 @@
       "age": 24,
       "birthDate": "2002-05-07",
       "email": "daniele.lorenzano@nightout.demo",
+      "password": "user123",
       "city": "Milano",
       "area": "Loreto",
       "latitude": 45.48069,
@@ -487,6 +488,7 @@
         "surname": "Conti",
         "fullName": "Matteo Conti",
         "email": "matteo.conti@nightout.demo",
+        "password": "venue123",
         "city": "Milano",
         "verified": true,
         "avatarUrl": null
@@ -751,6 +753,7 @@
         "surname": "Conti",
         "fullName": "Matteo Conti",
         "email": "matteo.conti@nightout.demo",
+        "password": "venue123",
         "city": "Milano",
         "verified": true,
         "avatarUrl": null
@@ -823,6 +826,7 @@
         "surname": "Conti",
         "fullName": "Matteo Conti",
         "email": "matteo.conti@nightout.demo",
+        "password": "venue123",
         "city": "Milano",
         "verified": true,
         "avatarUrl": null
@@ -919,6 +923,7 @@
         "surname": "Conti",
         "fullName": "Matteo Conti",
         "email": "matteo.conti@nightout.demo",
+        "password": "venue123",
         "city": "Milano",
         "verified": true,
         "avatarUrl": null
@@ -1200,6 +1205,7 @@
       "age": 24,
       "birthDate": "2002-04-15",
       "email": "filippo.scaranello@nightout.demo",
+      "password": "pr123",
       "city": "Milano",
       "latitude": 45.4832,
       "longitude": 9.188,

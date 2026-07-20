@@ -14,8 +14,9 @@ The backend also exposes root health endpoints outside the `/api` base path.
 |---|---|---|---|---|---|
 | GET | `/` | Basic backend health/root check. | None. | Plain health/status text. | Not used by frontend. |
 | GET | `/api/health` | API health check. | None. | Plain health/status text. | Not used by frontend. |
+| POST | `/api/auth/login` | Authenticate an existing seeded profile and derive its role. | JSON: `email`, `password`. | `LoginResponseDto`; `401 Unauthorized` for invalid credentials. | Login page and session setup. |
 | GET | `/api/demo/users` | List demo users, optionally filtered by role. | Query: `role` optional. | `UserDto[]`. | Not currently used by page code. Useful for demos/manual testing. |
-| GET | `/api/demo/session` | Return a seeded demo user for mock login/role selection. | Query: `role` optional. | `UserDto`. | `RoleSelectionPage` and app session setup. |
+| GET | `/api/demo/session` | Return a seeded demo user for the legacy mock-role flow. | Query: `role` optional. | `UserDto`. | Retained for backward compatibility; the frontend no longer calls it. |
 | GET | `/api/users` | List users, optionally by role. | Query: `role` optional. | `UserDto[]`. | Not currently used by frontend pages. |
 | GET | `/api/users/{userId}` | Get one user. | Path: `userId`. | `UserDto`. | Not currently used by frontend pages. |
 | GET | `/api/users/{userId}/profile` | Get profile summary for a user. | Path: `userId`. | `ProfileDto` with user details, counters, saved events, tickets, and notifications. | `ProfilePage`. |
@@ -43,6 +44,20 @@ The backend also exposes root health endpoints outside the `/api` base path.
 
 The exact Java DTO classes are the source of truth. These summaries describe the fields the frontend currently depends on.
 
+### `LoginResponseDto`
+
+```json
+{
+  "authenticated": true,
+  "profileId": 1,
+  "displayName": "Daniele Lorenzano",
+  "email": "daniele.lorenzano@nightout.demo",
+  "role": "USER"
+}
+```
+
+Login response roles are `USER`, `VENUE`, and `PR`, mapped from the existing `NORMAL_USER`, `VENUE_MANAGER`, and `PR_MANAGER` profile roles. The response never includes the password.
+
 ### `UserDto`
 
 ```json
@@ -50,7 +65,7 @@ The exact Java DTO classes are the source of truth. These summaries describe the
   "id": 1,
   "name": "Sofia",
   "email": "sofia@example.com",
-  "role": "USER",
+  "role": "NORMAL_USER",
   "city": "Milano",
   "verified": true,
   "points": 120,
@@ -224,7 +239,9 @@ PowerShell examples:
 
 ```powershell
 Invoke-RestMethod http://localhost:8080/api/health
-Invoke-RestMethod "http://localhost:8080/api/demo/session?role=USER"
+$loginBody = @{ email = "daniele.lorenzano@nightout.demo"; password = "user123" } | ConvertTo-Json
+Invoke-RestMethod -Method Post -Uri http://localhost:8080/api/auth/login -ContentType "application/json" -Body $loginBody
+Invoke-RestMethod "http://localhost:8080/api/demo/session?role=NORMAL_USER"
 Invoke-RestMethod "http://localhost:8080/api/events?city=Milano&genre=TECHNO&sort=popularity"
 Invoke-RestMethod http://localhost:8080/api/events/1
 Invoke-RestMethod "http://localhost:8080/api/users/1/tickets"

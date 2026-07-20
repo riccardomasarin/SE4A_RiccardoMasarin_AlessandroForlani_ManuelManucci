@@ -1,48 +1,51 @@
 import { useState } from 'react'
+import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { useSession } from '../session'
-import type { UserRole } from '../types/nightout'
 
-const roles: Array<{
-  role: UserRole
-  title: string
-  body: string
-  target: string
-}> = [
-  {
-    role: 'NORMAL_USER',
-    title: 'Normal user',
-    body: 'Browse events, reserve tickets, join pregames.',
-    target: '/feed',
-  },
-  {
-    role: 'VENUE_MANAGER',
-    title: 'Venue partner',
-    body: 'Open the PR/venue dashboard with ticket, table, promo, and check-in data.',
-    target: '/manager',
-  },
-  {
-    role: 'PR_MANAGER',
-    title: 'PR demo',
-    body: 'Use the same dashboard flow with a PR-facing account.',
-    target: '/manager',
-  },
-]
+function homeForRole(role: string) {
+  if (role === 'VENUE_MANAGER') {
+    return '/manager'
+  }
+  if (role === 'PR_MANAGER') {
+    return '/pr'
+  }
+  return '/feed'
+}
 
 export function RoleSelectionPage() {
-  const { selectRole } = useSession()
+  const { login } = useSession()
   const navigate = useNavigate()
-  const [selected, setSelected] = useState<UserRole>('NORMAL_USER')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  async function continueAsRole() {
-    const item = roles.find((role) => role.role === selected) ?? roles[0]
+  async function submitLogin(
+    event: React.FormEvent<HTMLFormElement>,
+  ) {
+    event.preventDefault()
     setError('')
+    setLoading(true)
+
     try {
-      await selectRole(item.role)
-      navigate(item.target)
-    } catch {
-      setError('Backend not reachable. Start the Spring Boot server on port 8080.')
+      const user = await login(email, password)
+      navigate(homeForRole(user.role), {
+        replace: true,
+      })
+    } catch (loginError) {
+      if (
+        axios.isAxiosError(loginError) &&
+        loginError.response?.status === 401
+      ) {
+        setError('Invalid email or password.')
+      } else {
+        setError(
+          'Unable to log in. Check that the backend is running on port 8080.',
+        )
+      }
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -50,27 +53,57 @@ export function RoleSelectionPage() {
     <section className="role-screen">
       <div className="role-hero">
         <h1>NightOUT</h1>
-        <p>Choose a mock role to explore the nightlife app without real authentication.</p>
+        <p>Log in with your NightOUT demo profile.</p>
       </div>
 
-      <div className="role-grid">
-        {roles.map((role) => (
-          <button
-            className={selected === role.role ? 'role-card selected' : 'role-card'}
-            type="button"
-            key={role.role}
-            onClick={() => setSelected(role.role)}
-          >
-            <strong>{role.title}</strong>
-            <span>{role.body}</span>
-          </button>
-        ))}
-      </div>
+      <form
+        className="login-form"
+        onSubmit={submitLogin}
+      >
+        <label>
+          Email
+          <input
+            type="email"
+            name="email"
+            autoComplete="email"
+            value={email}
+            onChange={(event) =>
+              setEmail(event.target.value)
+            }
+            disabled={loading}
+            required
+          />
+        </label>
 
-      {error && <p className="inline-error">{error}</p>}
-      <button className="primary-action" type="button" onClick={continueAsRole}>
-        Continue
-      </button>
+        <label>
+          Password
+          <input
+            type="password"
+            name="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(event) =>
+              setPassword(event.target.value)
+            }
+            disabled={loading}
+            required
+          />
+        </label>
+
+        {error && (
+          <p className="inline-error" role="alert">
+            {error}
+          </p>
+        )}
+
+        <button
+          className="primary-action"
+          type="submit"
+          disabled={loading}
+        >
+          {loading ? 'Logging in...' : 'Log in'}
+        </button>
+      </form>
     </section>
   )
 }

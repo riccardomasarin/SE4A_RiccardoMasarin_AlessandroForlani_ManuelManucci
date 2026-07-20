@@ -3,6 +3,19 @@ export type UserRole =
   | 'PR_MANAGER'
   | 'VENUE_MANAGER'
 
+export type AuthenticationRole =
+  | 'USER'
+  | 'VENUE'
+  | 'PR'
+
+export interface LoginResponseDto {
+  authenticated: true
+  profileId: number
+  displayName: string
+  email: string
+  role: AuthenticationRole
+}
+
 export type MusicGenre =
   | 'TECHNO'
   | 'HOUSE'
