@@ -45,6 +45,11 @@ public interface TicketRepository
             TicketStatus status
     );
 
+    long countByEventIdAndStatusAndCheckedInAtIsNotNull(
+            Long eventId,
+            TicketStatus status
+    );
+
     long countByPrAssignmentPrIdAndStatus(
             Long prId,
             TicketStatus status
@@ -70,15 +75,16 @@ public interface TicketRepository
                     TicketStatus status,
                     LocalDateTime confirmationDeadline
             );
-     List<Ticket>
-        findByStatusAndEvent_StartsAtLessThanEqual(
-                TicketStatus status,
-                LocalDateTime currentTime
-        );
 
-List<Ticket>
-        findByStatusAndEvent_EndsAtLessThanEqual(
-                TicketStatus status,
-                LocalDateTime currentTime
-        );
+    List<Ticket>
+            findByStatusAndEvent_StartsAtLessThanEqual(
+                    TicketStatus status,
+                    LocalDateTime currentTime
+            );
+
+    List<Ticket>
+            findByStatusAndEvent_EndsAtLessThanEqual(
+                    TicketStatus status,
+                    LocalDateTime currentTime
+            );
 }

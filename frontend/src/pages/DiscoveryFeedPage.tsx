@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { nightoutApi } from '../api/nightoutApi'
 import { EventCard } from '../components/EventCard'
@@ -64,10 +64,14 @@ const priceOptions = [
 
 function formatLocalDate(date: Date) {
   const year = date.getFullYear()
+
   const month = String(
     date.getMonth() + 1,
   ).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
+
+  const day = String(
+    date.getDate(),
+  ).padStart(2, '0')
 
   return `${year}-${month}-${day}`
 }
@@ -75,17 +79,50 @@ function formatLocalDate(date: Date) {
 export function DiscoveryFeedPage() {
   const { user } = useSession()
 
+  const recommendationsCarouselRef =
+    useRef<HTMLDivElement | null>(null)
+
+  const promotionsCarouselRef =
+    useRef<HTMLDivElement | null>(null)
+
+  const featuredCarouselRef =
+    useRef<HTMLDivElement | null>(null)
+
+  const mostBookedCarouselRef =
+    useRef<HTMLDivElement | null>(null)
+
+  const scrollCarousel = (
+    container: HTMLDivElement | null,
+    direction: 'left' | 'right',
+  ) => {
+    if (!container) {
+      return
+    }
+
+    container.scrollBy({
+      left:
+        direction === 'right'
+          ? container.clientWidth
+          : -container.clientWidth,
+      behavior: 'smooth',
+    })
+  }
+
   const [events, setEvents] = useState<EventSummaryDto[]>([])
 
   const [recommendations, setRecommendations] = useState<
     RecommendedEventDto[]
   >([])
 
-  const [recommendationsLoading, setRecommendationsLoading] =
-    useState(false)
+  const [
+    recommendationsLoading,
+    setRecommendationsLoading,
+  ] = useState(false)
 
-  const [recommendationsError, setRecommendationsError] =
-    useState(false)
+  const [
+    recommendationsError,
+    setRecommendationsError,
+  ] = useState(false)
 
   const [savedIds, setSavedIds] = useState<Set<number>>(
     new Set(),
@@ -111,7 +148,10 @@ export function DiscoveryFeedPage() {
   const [fromDate, setFromDate] = useState('')
   const [toDate, setToDate] = useState('')
   const [maxPrice, setMaxPrice] = useState('')
-  const [entryCondition, setEntryCondition] = useState('ALL')
+
+  const [entryCondition, setEntryCondition] =
+    useState('ALL')
+
   const [sort, setSort] = useState('popularity')
 
   const [loading, setLoading] = useState(true)
@@ -126,22 +166,32 @@ export function DiscoveryFeedPage() {
       .getEvents({
         userId: user?.id,
         city: 'Milano',
-        area: area === 'ALL' ? undefined : area,
-        genre: genre === 'ALL' ? undefined : genre,
+        area:
+          area === 'ALL'
+            ? undefined
+            : area,
+        genre:
+          genre === 'ALL'
+            ? undefined
+            : genre,
         venueCategory:
           venueCategory === 'ALL'
             ? undefined
             : venueCategory,
-        fromDate: fromDate || undefined,
-        toDate: toDate || undefined,
-        maxPrice: maxPrice
-          ? Number(maxPrice)
-          : undefined,
+        fromDate:
+          fromDate || undefined,
+        toDate:
+          toDate || undefined,
+        maxPrice:
+          maxPrice
+            ? Number(maxPrice)
+            : undefined,
         entryCondition:
           entryCondition === 'ALL'
             ? undefined
             : entryCondition,
-        search: search.trim() || undefined,
+        search:
+          search.trim() || undefined,
         sort,
       })
       .then((data) => {
@@ -191,7 +241,7 @@ export function DiscoveryFeedPage() {
     setRecommendationsError(false)
 
     nightoutApi
-      .getRecommendations(user.id, 5)
+      .getRecommendations(user.id, 12)
       .then((data) => {
         if (active) {
           setRecommendations(data)
@@ -225,7 +275,9 @@ export function DiscoveryFeedPage() {
       .then((savedEvents) => {
         setSavedIds(
           new Set(
-            savedEvents.map((event) => event.id),
+            savedEvents.map(
+              (event) => event.id,
+            ),
           ),
         )
       })
@@ -251,7 +303,9 @@ export function DiscoveryFeedPage() {
     const loadFriendsAttending = async () => {
       const eventIds = Array.from(
         new Set([
-          ...events.map((event) => event.id),
+          ...events.map(
+            (event) => event.id,
+          ),
           ...recommendations.map(
             (recommendation) =>
               recommendation.event.id,
@@ -260,25 +314,27 @@ export function DiscoveryFeedPage() {
       )
 
       const results = await Promise.all(
-        eventIds.map(async (currentEventId) => {
-          try {
-            const friends =
-              await nightoutApi.getFriendsAttending(
-                user.id,
-                currentEventId,
-              )
+        eventIds.map(
+          async (currentEventId) => {
+            try {
+              const friends =
+                await nightoutApi.getFriendsAttending(
+                  user.id,
+                  currentEventId,
+                )
 
-            return {
-              eventId: currentEventId,
-              friends,
+              return {
+                eventId: currentEventId,
+                friends,
+              }
+            } catch {
+              return {
+                eventId: currentEventId,
+                friends: [] as FriendUserDto[],
+              }
             }
-          } catch {
-            return {
-              eventId: currentEventId,
-              friends: [] as FriendUserDto[],
-            }
-          }
-        }),
+          },
+        ),
       )
 
       if (!active) {
@@ -322,6 +378,18 @@ export function DiscoveryFeedPage() {
     [events],
   )
 
+  const mostBookedEvents = useMemo(
+    () =>
+      [...events]
+        .sort(
+          (firstEvent, secondEvent) =>
+            secondEvent.confirmedTickets
+            - firstEvent.confirmedTickets,
+        )
+        .slice(0, 12),
+    [events],
+  )
+
   const activeFilterCount = [
     search.trim(),
     genre !== 'ALL',
@@ -347,7 +415,8 @@ export function DiscoveryFeedPage() {
   }
 
   const selectToday = () => {
-    const today = formatLocalDate(new Date())
+    const today =
+      formatLocalDate(new Date())
 
     setFromDate(today)
     setToDate(today)
@@ -368,11 +437,13 @@ export function DiscoveryFeedPage() {
   }
 
   const selectedGenreLabel = genres.find(
-    (item) => item.value === genre,
+    (item) =>
+      item.value === genre,
   )?.label
 
   const selectedAreaLabel = areas.find(
-    (item) => item.value === area,
+    (item) =>
+      item.value === area,
   )?.label
 
   const selectedVenueLabel = categories.find(
@@ -380,16 +451,15 @@ export function DiscoveryFeedPage() {
       item.value === venueCategory,
   )?.label
 
-  const selectedEntryLabel =
-    entryOptions.find(
-      (item) =>
-        item.value === entryCondition,
-    )?.label
+  const selectedEntryLabel = entryOptions.find(
+    (item) =>
+      item.value === entryCondition,
+  )?.label
 
-  const selectedPriceLabel =
-    priceOptions.find(
-      (item) => item.value === maxPrice,
-    )?.label
+  const selectedPriceLabel = priceOptions.find(
+    (item) =>
+      item.value === maxPrice,
+  )?.label
 
   if (error) {
     return (
@@ -437,7 +507,9 @@ export function DiscoveryFeedPage() {
           {search.trim() && (
             <button
               type="button"
-              onClick={() => setSearch('')}
+              onClick={() =>
+                setSearch('')
+              }
             >
               Search: {search} ×
             </button>
@@ -446,7 +518,9 @@ export function DiscoveryFeedPage() {
           {genre !== 'ALL' && (
             <button
               type="button"
-              onClick={() => setGenre('ALL')}
+              onClick={() =>
+                setGenre('ALL')
+              }
             >
               {selectedGenreLabel} ×
             </button>
@@ -455,7 +529,9 @@ export function DiscoveryFeedPage() {
           {area !== 'ALL' && (
             <button
               type="button"
-              onClick={() => setArea('ALL')}
+              onClick={() =>
+                setArea('ALL')
+              }
             >
               {selectedAreaLabel ?? area} ×
             </button>
@@ -475,7 +551,9 @@ export function DiscoveryFeedPage() {
           {fromDate && (
             <button
               type="button"
-              onClick={() => setFromDate('')}
+              onClick={() =>
+                setFromDate('')
+              }
             >
               From: {fromDate} ×
             </button>
@@ -484,7 +562,9 @@ export function DiscoveryFeedPage() {
           {toDate && (
             <button
               type="button"
-              onClick={() => setToDate('')}
+              onClick={() =>
+                setToDate('')
+              }
             >
               To: {toDate} ×
             </button>
@@ -493,7 +573,9 @@ export function DiscoveryFeedPage() {
           {maxPrice && (
             <button
               type="button"
-              onClick={() => setMaxPrice('')}
+              onClick={() =>
+                setMaxPrice('')
+              }
             >
               {selectedPriceLabel} ×
             </button>
@@ -834,26 +916,61 @@ export function DiscoveryFeedPage() {
               </span>
             </div>
           ) : (
-            <div className="horizontal-list recommendation-list">
-              {recommendations.map((recommendation) => (
-                <EventCard
-                  compact
-                  event={recommendation.event}
-                  key={recommendation.event.id}
-                  saved={savedIds.has(
-                    recommendation.event.id,
-                  )}
-                  friendsAttending={
-                    friendsByEvent[
-                      recommendation.event.id
-                    ] ?? []
-                  }
-                  recommendationReason={
-                    recommendation.reasons[0]
-                    ?? `Recommendation score: ${recommendation.score}`
-                  }
-                />
-              ))}
+            <div className="event-carousel">
+              <button
+                type="button"
+                className="carousel-arrow carousel-arrow-left"
+                aria-label="Previous recommendations"
+                onClick={() =>
+                  scrollCarousel(
+                    recommendationsCarouselRef.current,
+                    'left',
+                  )
+                }
+              >
+                ‹
+              </button>
+
+              <div
+                ref={recommendationsCarouselRef}
+                className="horizontal-list recommendation-list arrow-carousel-list"
+              >
+                {recommendations.map(
+                  (recommendation) => (
+                    <EventCard
+                      compact
+                      event={recommendation.event}
+                      key={recommendation.event.id}
+                      saved={savedIds.has(
+                        recommendation.event.id,
+                      )}
+                      friendsAttending={
+                        friendsByEvent[
+                          recommendation.event.id
+                        ] ?? []
+                      }
+                      recommendationReason={
+                        recommendation.reasons[0]
+                        ?? `Recommendation score: ${recommendation.score}`
+                      }
+                    />
+                  ),
+                )}
+              </div>
+
+              <button
+                type="button"
+                className="carousel-arrow carousel-arrow-right"
+                aria-label="Next recommendations"
+                onClick={() =>
+                  scrollCarousel(
+                    recommendationsCarouselRef.current,
+                    'right',
+                  )
+                }
+              >
+                ›
+              </button>
             </div>
           )}
         </section>
@@ -893,18 +1010,51 @@ export function DiscoveryFeedPage() {
               </Link>
             </div>
 
-            <div className="horizontal-list">
-              {promos.map((event) => (
-                <EventCard
-                  compact
-                  event={event}
-                  key={event.id}
-                  saved={savedIds.has(event.id)}
-                  friendsAttending={
-                    friendsByEvent[event.id] ?? []
-                  }
-                />
-              ))}
+            <div className="event-carousel">
+              <button
+                type="button"
+                className="carousel-arrow carousel-arrow-left"
+                aria-label="Previous promotions"
+                onClick={() =>
+                  scrollCarousel(
+                    promotionsCarouselRef.current,
+                    'left',
+                  )
+                }
+              >
+                ‹
+              </button>
+
+              <div
+                ref={promotionsCarouselRef}
+                className="horizontal-list arrow-carousel-list"
+              >
+                {promos.map((event) => (
+                  <EventCard
+                    compact
+                    event={event}
+                    key={event.id}
+                    saved={savedIds.has(event.id)}
+                    friendsAttending={
+                      friendsByEvent[event.id] ?? []
+                    }
+                  />
+                ))}
+              </div>
+
+              <button
+                type="button"
+                className="carousel-arrow carousel-arrow-right"
+                aria-label="Next promotions"
+                onClick={() =>
+                  scrollCarousel(
+                    promotionsCarouselRef.current,
+                    'right',
+                  )
+                }
+              >
+                ›
+              </button>
             </div>
           </section>
 
@@ -913,17 +1063,110 @@ export function DiscoveryFeedPage() {
               <h2>Best in your area</h2>
             </div>
 
-            <div className="spotlight-carousel">
-              {featured.map((event) => (
-                <EventCard
-                  event={event}
-                  key={event.id}
-                  saved={savedIds.has(event.id)}
-                  friendsAttending={
-                    friendsByEvent[event.id] ?? []
-                  }
-                />
-              ))}
+            <div className="event-carousel">
+              <button
+                type="button"
+                className="carousel-arrow carousel-arrow-left"
+                aria-label="Previous featured events"
+                onClick={() =>
+                  scrollCarousel(
+                    featuredCarouselRef.current,
+                    'left',
+                  )
+                }
+              >
+                ‹
+              </button>
+
+              <div
+                ref={featuredCarouselRef}
+                className="spotlight-carousel arrow-carousel-list"
+              >
+                {featured.map((event) => (
+                  <EventCard
+                    event={event}
+                    key={event.id}
+                    saved={savedIds.has(event.id)}
+                    friendsAttending={
+                      friendsByEvent[event.id] ?? []
+                    }
+                  />
+                ))}
+              </div>
+
+              <button
+                type="button"
+                className="carousel-arrow carousel-arrow-right"
+                aria-label="Next featured events"
+                onClick={() =>
+                  scrollCarousel(
+                    featuredCarouselRef.current,
+                    'right',
+                  )
+                }
+              >
+                ›
+              </button>
+            </div>
+          </section>
+
+          <section className="section-block">
+            <div className="section-heading">
+              <div>
+                <h2>Most booked events</h2>
+
+                <p className="section-description">
+                  The events with the highest number of confirmed
+                  bookings.
+                </p>
+              </div>
+            </div>
+
+            <div className="event-carousel">
+              <button
+                type="button"
+                className="carousel-arrow carousel-arrow-left"
+                aria-label="Previous most booked events"
+                onClick={() =>
+                  scrollCarousel(
+                    mostBookedCarouselRef.current,
+                    'left',
+                  )
+                }
+              >
+                ‹
+              </button>
+
+              <div
+                ref={mostBookedCarouselRef}
+                className="horizontal-list arrow-carousel-list"
+              >
+                {mostBookedEvents.map((event) => (
+                  <EventCard
+                    compact
+                    event={event}
+                    key={event.id}
+                    saved={savedIds.has(event.id)}
+                    friendsAttending={
+                      friendsByEvent[event.id] ?? []
+                    }
+                  />
+                ))}
+              </div>
+
+              <button
+                type="button"
+                className="carousel-arrow carousel-arrow-right"
+                aria-label="Next most booked events"
+                onClick={() =>
+                  scrollCarousel(
+                    mostBookedCarouselRef.current,
+                    'right',
+                  )
+                }
+              >
+                ›
+              </button>
             </div>
           </section>
 

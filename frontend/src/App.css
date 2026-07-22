@@ -1,9 +1,3 @@
-/* ==========================================================================
-   NIGHTOUT — STILI APPLICAZIONE
-   Rifattorizzazione conservativa: nessuna classe rinominata o rimossa.
-   Le regole condivise sono state accorpate senza modificare il risultato visivo.
-   ========================================================================== */
-
 /* 01. SHELL, TOP BAR E NAVIGAZIONE ======================================== */
 .app-shell {
   width: min(100%, 1180px);
@@ -5569,27 +5563,14 @@
 
 .recommendation-feed-section {
   position: relative;
-  overflow: hidden;
-  border: 1px solid rgba(124, 77, 255, 0.3);
-  background:
-    linear-gradient(
-      135deg,
-      rgba(124, 77, 255, 0.1),
-      rgba(255, 74, 173, 0.05)
-    ),
-    var(--surface);
+  overflow: visible;
+  border: 0;
+  background: transparent;
 }
 
 .recommendation-feed-section::before {
-  position: absolute;
-  top: -80px;
-  right: -70px;
-  width: 190px;
-  height: 190px;
-  border-radius: 50%;
-  background: rgba(124, 77, 255, 0.12);
-  content: '';
-  pointer-events: none;
+  display: none;
+  content: none;
 }
 
 .recommendation-feed-section > * {
@@ -5597,8 +5578,145 @@
   z-index: 1;
 }
 
-.recommendation-list {
-  padding-bottom: 4px;
+/* =========================================================
+   CAROSELLI DASHBOARD CON FRECCE
+   ========================================================= */
+
+.event-carousel {
+  display: grid;
+  grid-template-columns:
+    44px
+    minmax(0, 1fr)
+    44px;
+  align-items: center;
+  gap: 10px;
+
+  width: 100%;
+  min-width: 0;
+}
+
+/* Lista orizzontale delle card */
+
+.arrow-carousel-list {
+  display: grid;
+  grid-auto-flow: column;
+
+  /* Quattro card complete su desktop */
+  grid-auto-columns:
+    calc((100% - 48px) / 4);
+
+  gap: 16px;
+
+  width: 100%;
+  min-width: 0;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+
+  padding: 4px 0;
+
+  /* Nasconde la scrollbar su Firefox */
+  scrollbar-width: none;
+
+  /* Nasconde la scrollbar sul vecchio Edge */
+  -ms-overflow-style: none;
+}
+
+/* Nasconde la scrollbar su Chrome, Edge e Safari */
+
+.arrow-carousel-list::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.arrow-carousel-list > * {
+  min-width: 0;
+  scroll-snap-align: start;
+}
+
+/* Frecce laterali */
+
+.carousel-arrow {
+  position: static;
+  z-index: 10;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 44px;
+  height: 44px;
+  padding: 0;
+
+  border: 1px solid rgba(124, 77, 255, 0.85);
+  border-radius: 50%;
+
+  color: #ffffff;
+  background: rgba(8, 8, 13, 0.94);
+
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.45);
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.carousel-arrow:hover {
+  border-color: var(--violet);
+  background: var(--violet);
+  transform: scale(1.06);
+}
+
+/* Tre card su schermi medi */
+
+@media (max-width: 1050px) {
+  .arrow-carousel-list {
+    grid-auto-columns:
+      calc((100% - 32px) / 3);
+  }
+}
+
+/* Due card su tablet */
+
+@media (max-width: 760px) {
+  .arrow-carousel-list {
+    grid-auto-columns:
+      calc((100% - 16px) / 2);
+  }
+}
+
+/* Una card quasi completa su smartphone */
+
+@media (max-width: 520px) {
+  .event-carousel {
+    grid-template-columns:
+      38px
+      minmax(0, 1fr)
+      38px;
+    gap: 6px;
+  }
+
+  .arrow-carousel-list {
+    grid-auto-columns: 88%;
+  }
+
+  .carousel-arrow {
+    width: 38px;
+    height: 38px;
+    font-size: 27px;
+  }
 }
 
 .recommendation-feed-status,
@@ -5636,7 +5754,7 @@
 
 @media (max-width: 600px) {
   .recommendation-feed-section {
-    padding: 16px;
+    padding: 0;
   }
 
   .recommendation-feed-status,

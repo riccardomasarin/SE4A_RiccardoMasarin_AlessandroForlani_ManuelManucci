@@ -111,35 +111,32 @@ public class DashboardService {
                         );
 
         long confirmed =
-                dashboardDataMediator
-                        .countConfirmedTickets(
-                                selectedEvent.getId()
-                        );
+        dashboardDataMediator
+                .countConfirmedTickets(
+                        selectedEvent.getId()
+                );
 
-        int checkins =
-                channels
-                        .stream()
-                        .mapToInt(
-                                SalesChannel::getCheckins
-                        )
-                        .sum();
+long checkins =
+        dashboardDataMediator
+                .countCheckedInConfirmedTickets(
+                        selectedEvent.getId()
+                );
 
-        int checkinRate =
-                confirmed == 0
-                        ? 0
-                        : (int) Math.round(
-                                checkins
-                                        * 100.0
-                                        / confirmed
-                        );
+int checkinRate =
+        confirmed == 0
+                ? 0
+                : (int) Math.round(
+                        checkins
+                                * 100.0
+                                / confirmed
+                );
 
         List<String> insights =
                 List.of(
                         "Best channel: "
                                 + bestChannel(channels),
                         "Promo usage: 148 demo redemptions",
-                        "Audience: 54% M / 46% F",
-                        "Syncride return transport: placeholder active"
+                        "Audience: 54% M / 46% F"
                 );
 
         List<EventSummaryDto> eventDtos =

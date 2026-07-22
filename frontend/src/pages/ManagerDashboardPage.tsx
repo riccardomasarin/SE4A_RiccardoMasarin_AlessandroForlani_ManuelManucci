@@ -289,40 +289,50 @@ export function ManagerDashboardPage() {
           </article>
         </div>
 
-        {dashboard.insightCards.length > 0 && (
-          <div className="venue-insights">
-            {dashboard.insightCards.map(
-              (insight) => {
-                const separatorIndex =
-                  insight.indexOf(':')
+        {dashboard.insightCards.filter(
+  (insight) =>
+    !insight
+      .toLowerCase()
+      .includes('syncride return transport'),
+).length > 0 && (
+  <div className="venue-insights">
+    {dashboard.insightCards
+      .filter(
+        (insight) =>
+          !insight
+            .toLowerCase()
+            .includes('syncride return transport'),
+      )
+      .map((insight) => {
+        const separatorIndex =
+          insight.indexOf(':')
 
-                const title =
-                  separatorIndex >= 0
-                    ? insight
-                        .slice(0, separatorIndex)
-                        .trim()
-                    : 'Insight'
+        const title =
+          separatorIndex >= 0
+            ? insight
+                .slice(0, separatorIndex)
+                .trim()
+            : 'Insight'
 
-                const value =
-                  separatorIndex >= 0
-                    ? insight
-                        .slice(separatorIndex + 1)
-                        .trim()
-                    : insight
+        const value =
+          separatorIndex >= 0
+            ? insight
+                .slice(separatorIndex + 1)
+                .trim()
+            : insight
 
-                return (
-                  <div
-                    className="list-tile"
-                    key={insight}
-                  >
-                    <strong>{title}</strong>
-                    <span>{value}</span>
-                  </div>
-                )
-              },
-            )}
+        return (
+          <div
+            className="list-tile"
+            key={insight}
+          >
+            <strong>{title}</strong>
+            <span>{value}</span>
           </div>
-        )}
+        )
+      })}
+  </div>
+)}
       </section>
 
       <section className="section-block">

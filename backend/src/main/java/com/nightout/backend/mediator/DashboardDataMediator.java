@@ -81,6 +81,16 @@ public class DashboardDataMediator {
                 );
     }
 
+    public long countCheckedInConfirmedTickets(
+            Long eventId
+    ) {
+        return ticketRepository
+                .countByEventIdAndStatusAndCheckedInAtIsNotNull(
+                        eventId,
+                        TicketStatus.CONFIRMED
+                );
+    }
+
     public int countPregamesForEvent(
             Long eventId
     ) {
