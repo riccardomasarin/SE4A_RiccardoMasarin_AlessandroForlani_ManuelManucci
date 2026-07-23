@@ -398,6 +398,17 @@ function App() {
                 </ProtectedPage>
               }
             />
+            <Route
+  path="/manager/help-support"
+  element={
+    <ProtectedPage
+      user={user}
+      role="VENUE_MANAGER"
+    >
+      <HelpSupportPage />
+    </ProtectedPage>
+  }
+/>
 
             <Route
               path="/pr"

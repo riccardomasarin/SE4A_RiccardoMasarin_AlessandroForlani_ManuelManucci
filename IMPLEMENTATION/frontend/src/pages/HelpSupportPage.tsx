@@ -29,6 +29,13 @@ export function HelpSupportPage() {
   const [formError, setFormError] =
     useState('')
 
+  const accountPath =
+    user?.role === 'VENUE_MANAGER'
+      ? '/manager/profile'
+      : user?.role === 'PR_MANAGER'
+        ? '/pr/account'
+        : '/profile'
+
   const submitSupportRequest = async (
     event: FormEvent<HTMLFormElement>,
   ) => {
@@ -112,7 +119,7 @@ export function HelpSupportPage() {
         action={
           <Link
             className="small-action"
-            to="/profile"
+            to={accountPath}
           >
             Back to account
           </Link>
@@ -303,7 +310,7 @@ export function HelpSupportPage() {
           <div className="support-request-actions">
             <Link
               className="secondary-action"
-              to="/profile"
+              to={accountPath}
             >
               Cancel
             </Link>
