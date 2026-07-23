@@ -125,16 +125,6 @@ http://localhost:5173
 
 Use `npm.cmd` on Windows when PowerShell blocks the `npm.ps1` script. On macOS and Linux, use `npm`.
 
-## Demo accounts
-
-| Role | Email | Password |
-|---|---|---|
-| Normal User | `daniele.lorenzano@nightout.demo` | `user123` |
-| Venue Manager | `matteo.conti@nightout.demo` | `venue123` |
-| PR Manager | `filippo.scaranello@nightout.demo` | `pr123` |
-
-These credentials are public demo accounts and must not be reused for real services.
-
 ## Core workflows
 
 - A ticket is created as `PENDING`.
